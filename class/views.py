@@ -14,7 +14,7 @@ def index(request):
 @csrf_exempt
 def login_(request):
 	print(request.session.get_expire_at_browser_close())
-	if request.session.get("email")!=None:
+	if request.session.get("id")!=None:
 		return redirect(index)
 	if request.method == 'POST':
 		email=request.POST.get("email")
@@ -22,7 +22,7 @@ def login_(request):
 		user=authenticate(username=email,password=password)
 		if user is not None:
 			request.session["name"] = user.first_name+" "+user.last_name
-			request.session["email"] = email
+			request.session["id"] = user.id
 			login(request,user)
 			return redirect(index)
 		else:
@@ -31,7 +31,7 @@ def login_(request):
 
 @csrf_exempt
 def register(request):
-	if request.session.get("email")!=None:
+	if request.session.get("id")!=None:
 		return redirect(index)
 	if request.method == 'POST':
 		first_name=request.POST.get("first_name")
@@ -43,7 +43,8 @@ def register(request):
 			user.set_password(password) # This line will hash the password
 		user.save()
 		request.session["name"] = first_name+" "+last_name
-		request.session["email"] = email
+		request.session["id"] = user.id
+		login(request,user)
 		return redirect(index)
 	return render(request, 'class/register.html', {})
 

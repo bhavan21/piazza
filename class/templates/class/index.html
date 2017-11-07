@@ -2,24 +2,154 @@
 <html>
 <head>
 	<title>Piazza</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0"/>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/codemirror.min.css"><link href="https://cdnjs.cloudflare.com/ajax/libs/froala-editor/2.6.0/css/froala_editor.pkgd.min.css" rel="stylesheet" type="text/css" />
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/froala-editor/2.6.0/css/froala_style.min.css" rel="stylesheet" type="text/css" />
 </head>
+<style type="text/css">
+#sidebar::-webkit-scrollbar { 
+    display: none; 
+}
+#sidebar{
+    border-right: 2px solid #000000;
+    position: absolute;
+    top:10%;
+    left:0;
+    width: 28%;
+    height: 90%;
+    overflow-y: auto;
+    
+}
+#content{
+    position: absolute;
+    top:10%;
+    overflow-y:auto;
+    padding: 15px;
+    left:28%;
+    width: 72%;
+    height: 90%;
+    overflow-y: auto;
+}
+.post:hover{
+    cursor: pointer;
+    background-color: #F5E5C0;
+}
+#search-icon {
+    float: right;
+    margin-right: 15px;
+    margin-top: -38px;
+    position: relative;
+    z-index: 2;
+    color: green;
+}
+#search-box{
+    border:1px solid #000000; 
+    margin-bottom: 5px;
+    margin-top: 5px;
+    height: 30px;
+    width:70%;
+    padding: 3px;
+}
+#newpost{
+    height: 30px;
+    width: 25%;
+    background-color: green;
+    color: white;
+    padding: 3px;
+}
+</style>
 <body>
 
- <nav class="light-blue lighten-1" role="navigation">
+   <nav class="light-blue lighten-1" role="navigation">
     <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Piazza</a>
-      <ul class="right hide-on-med-and-down">
-        <li><a href="logout">Logout</a></li>
-      </ul>
+        <ul class="right hide-on-med-and-down">
+            <li><a href="#">My Classes</a></li>
+            <li><a href="logout">Logout</a></li>
+        </ul>
 
-      <ul id="nav-mobile" class="side-nav">
-      	<li><a href="login">Logout</a></li>
-      </ul>
-      <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+        <ul id="nav-mobile" class="side-nav">
+            <li><a href="#">My Classes</a></li> 
+            <li><a href="login">Logout</a></li>
+     </ul>
+     <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+ </div>
+</nav>
+
+ <!-- <div class="card-panel teal lighten-2">This is a card panel with a teal lighten-2 class</div> -->
+
+<!-- <div style="background-color:grey;padding: 3px; ">
+    <div class="chip">lab1</div>
+    <div class="chip">lab1</div>
+    <div class="chip">lab1</div>
+    <div class="chip">lab1</div>
+</div> -->
+
+
+<div  id="sidebar">
+    
+    <button id=newpost><span style="font-size: 14px;display: inline-block;">New Post</span></button>
+
+
+    <input id="search-box"  placeholder="Search..."  name="search"/>
+    <a href="#"><i id="search-icon" class="small material-icons">search</i></a>
+      
+    
+    
+    <ul class="collection" style="margin-top: 0px;">
+    {% for i in "123456789" %}
+    <li class="collection-item post" onclick="changeurl({{i}})">
+        <b>Heading</b><br>
+        Description Description Description Description. Description...
+    </li>
+    {% endfor %}
+    </ul>
     </div>
-  </nav>
-	
+<div class="col s8" id="content">
+    <h3>What is a question?</h3>
+    <p>A question is a linguistic expression used to make a request for information, or the request made using such an expression. The information requested is provided in the form of an answer.<br><br>Questions have developed a range of uses that go beyond the simple eliciting of information from another party. Rhetorical questions, for example, are used to make a point, and are not expected to be answered. Many languages have special grammatical forms for questions (for example, in the English sentence "Are you happy?", the inversion of the subject you and the verb are shows it to be a question rather than a statement). However, questions can also be asked without using these interrogative grammatical structures – for example one may use an imperative, as in "Tell me your name".</p>
+
+    <h5>Join the discusion</h5>
+   <!--  <div class="row" > 
+        <div class="input-field col s12">
+          <input name="comment" type="text" placeholder="Comment" class="validate">
+        </div>
+      </div> -->
+
+    <textarea id="froala-editor"></textarea>
+  
+</div>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/codemirror.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/mode/xml/xml.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/froala-editor/2.6.0//js/froala_editor.pkgd.min.js"></script>
+
+<script type="text/javascript">
+ function changeurl(i) {
+    var title="title";
+    var content="content of question "+i;
+    var urlPath="hi"+i
+    document.getElementById("content").innerHTML = content;
+    document.title = title;
+    window.history.pushState({"html":content,title},"", urlPath);
+}
+
+window.onpopstate = function(e){
+    if(e.state){
+        document.getElementById("content").innerHTML = e.state.html;
+        document.title = e.state.pageTitle;
+    }
+};
+
+$(function() {
+  $('textarea#froala-editor').froalaEditor()
+});
+
+
+</script>
 
 </body>
 </html>
