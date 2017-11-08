@@ -30,7 +30,7 @@ def login_(request):
             request.session["name"] = user.first_name+" "+user.last_name
             request.session["email"] = email
             login(request,user)
-            return redirect(index)
+            return redirect(user_home)
         else:
             return render(request, 'class/login.html', {"error":"Wrong Credentials"})
     return render(request, 'class/login.html', {})
@@ -67,9 +67,11 @@ def user_home(request):
         
         return HttpResponse(request.user.email)
     # first_name , last_name , email , username
+    return redirect(index)
     return HttpResponse('Go To Login Screen')
-
+@csrf_exempt
 def join_form(request):
+    print("join_form")
     if request.user.is_authenticated():
         class_code = request.POST['codein']
         pass_code = request.POST['codeout']
@@ -79,7 +81,7 @@ def join_form(request):
             return HttpResponse("No Class Exists")
         some = Joins.objects.create(class_id = class_to_join.first(), 
             stud_id = request.user , time_stamp = timezone.now())
-        return user_home(request)
+        return redirect(user_home)
 
-        return HttpResponse(class_code)
+    return redirect(index)
 

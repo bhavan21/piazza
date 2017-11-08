@@ -18,7 +18,7 @@
       <ul id="nav-mobile" class="right hide-on-med-and-down">
         <li><a href="sass.html">{{first_name}}</a></li>
         <li><a href="badges.html">{{last_name}}</a></li>
-        <li><a href="collapsible.html">Log Out</a></li>
+        <li><a href="logout">Log Out</a></li>
       </ul>
     </div>
   </nav>
@@ -36,7 +36,7 @@
 
 			 <div class="row">
 			    <form class="col s12" method="post" action="join_form">
-			    	{% csrf_token %}
+			    	<!-- {% csrf_token %} -->
 				      <div class="row">
 				        <div class="input-field col s6">
 				          <input id="class_code" name="codein" type="text" class="validate">
