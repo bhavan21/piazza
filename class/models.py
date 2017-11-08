@@ -76,3 +76,6 @@ class Option(models.Model):
 class OptionStudRelation(models.Model):
 	option_id =  models.ForeignKey(Option, on_delete=models.CASCADE)
 	stud_id = models.ForeignKey(User, on_delete=models.CASCADE)
+
+	class Meta:
+		unique_together = ('option_id', 'stud_id',)
