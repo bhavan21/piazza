@@ -71,7 +71,6 @@ def user_home(request):
     return HttpResponse('Go To Login Screen')
 @csrf_exempt
 def join_form(request):
-    print("join_form")
     if request.user.is_authenticated():
         class_code = request.POST['codein']
         pass_code = request.POST['codeout']
@@ -81,6 +80,22 @@ def join_form(request):
             return HttpResponse("No Class Exists")
         some = Joins.objects.create(class_id = class_to_join.first(), 
             stud_id = request.user , time_stamp = timezone.now())
+        return redirect(user_home)
+
+    return redirect(index)
+
+@csrf_exempt
+def create_form(request):
+    print("AKH")
+    if request.user.is_authenticated():
+        class_code = request.POST['classcode']
+        class_name = request.POST['classname']
+        semester = request.POST['semester']
+        year = request.POST['year']
+        some = Class.objects.create(course_name = class_name,
+            course_code = class_code,year = year , semester = semester)
+        some1 = ClassInsRelation.objects.create(class_id = some, 
+            ins_id = request.user , time_stamp = timezone.now())
         return redirect(user_home)
 
     return redirect(index)

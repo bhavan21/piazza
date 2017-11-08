@@ -8,6 +8,9 @@
 	$(document).ready(function() {
     $('#modal_join').modal();
     $('#modal_create').modal();
+    $('#select_semester').material_select();
+	$( "#datepicker" ).material_select();
+
 });
 </script>
 </head>
@@ -59,15 +62,57 @@
 		    </div> -->
 		  </div>
 
-   <div id="modal_create" class="modal">
-    <div class="modal-content">
-      <h4>Modal Create</h4>
-      <p>A bunch of text</p>
-    </div>
-    <div class="modal-footer">
-      <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
-    </div>
-  </div>
+  <!-- Modal Structure -->
+		  <div id="modal_create" action="index" class="modal">
+		    <div class="modal-content">
+
+			 <div class="row">
+			    <form class="col s12" method="post" action="create_form">
+			    	<!-- {% csrf_token %} -->
+				      <div class="row">
+				        <div class="input-field col s6">
+				          <input id="class_name_create" name="classname" type="text" class="validate">
+				          <label >Course Name</label>
+				        </div>
+				      </div>
+				      <div class="row">
+				        <div class="input-field col s6">
+				          <input id="class_code_create" name="classcode" type="text" class="validate">
+				          <label >Course Code</label>
+				        </div>
+				      </div>
+				      <div class="row">
+						<div class="input-field col s6">
+						    <select id="select_semester" name="semester">
+						      <option value="" disabled selected>Choose your option</option>
+						      <option value="Autumn">Autumn</option>
+						      <option value="Spring">Spring</option>
+						      <option value="Summer">Summer</option>
+						    </select>
+						    <label>Semester</label>
+						  </div>
+						<div class="input-field col s6">
+						    <select id="datepicker" name="year">
+						      <option value="" disabled selected>Choose Year</option>
+						      <option value="2017">2017</option>
+						      <option value="2015">2015</option>
+						      <option value="2016">2016</option>
+						      <option value="2018">2018</option>
+						      <option value="2019">2019</option>
+						    </select>
+						    <label>Year</label>
+						  </div>	   
+						 </div>
+						<br>
+				    <div class="center-align vertical-align">
+				 	     <input type="submit" class="modal-action  green modal-close waves-effect waves-yellow btn-flat" value="Create" >
+					</div>
+			    </form>
+			  </div>
+			</div>
+<!-- 		    <div class="modal-footer">
+		    </div> -->
+		  </div>
         
 
       <div class="row" id = 'instructor_class'>
@@ -84,7 +129,7 @@
 	            </div>
 
 	            <div class="card-action">
-	              <a href="#">{{akh.class_id.semester}} , {{akh.class_id.year}}</a>
+	              <span class = "black-text" >{{akh.class_id.semester}} , {{akh.class_id.year}} </span>
 	              <a href="#">Settings</a>
 	            </div>
 	          </div>
