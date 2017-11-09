@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Register</title>
+	<link rel="stylesheet" href="{% static 'class/materialize.min.css' %}" type="text/css" >
+
+    <script src="{% static 'class/materialize.min.js' %}"></script>
+
+</head>
+<body>
+
+ <nav class="light-blue lighten-1" role="navigation">
+    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Piazza</a>
+      <ul class="right hide-on-med-and-down">
+        <li><a href="login">Login</a></li>
+        <li><a href="#">Register</a></li>
+      </ul>
+
+      <ul id="nav-mobile" class="side-nav">
+      	<li><a href="login">Login</a></li>
+      	<li><a href="#">Register</a></li>
+      </ul>
+      <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+    </div>
+  </nav>
+
+  <div class="row" style="margin-top: 20px;">
+    <div class="col s2"></div>
+    <form class="col s8" action="register" method="post">
+      <div class="row">
+        <div class="input-field col s6">
+          <input id="first_name" name="first_name" type="text" placeholder="First name" class="validate">
+        </div>
+        <div class="input-field col s6">
+          <input id="last_name" name="last_name" type="text" placeholder="Last Name" class="validate">
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <input id="email" name="email" type="email" placeholder="Email" class="validate">
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <input id="password" name="password" type="password" placeholder="Password" class="validate">
+        </div>
+      </div>
+      <div class="row">
+        <input type="submit" class="waves-effect waves-light btn" value="Register"/>
+      </div>
+    </form>
+    <div class="col s2"></div>
+  </div>
+
+
+</body>
+</html>
