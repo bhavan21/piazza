@@ -14,14 +14,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate,login,logout
 
 @login_required(login_url='/class/login')
-def index(request):
-    return render(request, 'class/index.html', {})
+def index(request,course_id):
+    return render(request, 'class/index.html', {"course_id": course_id})
 
 @csrf_exempt
 def login_(request):
 	print(request.session.get_expire_at_browser_close())
 	if request.session.get("id")!=None:
-		return redirect(index)
+		return redirect(index,1)
 	if request.method == 'POST':
 		email=request.POST.get("email")
 		password=request.POST.get("password")
@@ -30,7 +30,7 @@ def login_(request):
 			request.session["name"] = user.first_name+" "+user.last_name
 			request.session["id"] = user.id
 			login(request,user)
-			return redirect(index)
+			return redirect(user_home)
 		else:
 			return render(request, 'class/login.html', {"error":"Wrong Credentials"})
 	return render(request, 'class/login.html', {})
@@ -51,7 +51,7 @@ def register(request):
 		request.session["name"] = first_name+" "+last_name
 		request.session["id"] = user.id
 		login(request,user)
-		return redirect(index)
+		return redirect(user_home)
 	return render(request, 'class/register.html', {})
 
 
@@ -69,8 +69,7 @@ def user_home(request):
         
         return HttpResponse(request.user.email)
     # first_name , last_name , email , username
-    return redirect(index)
-    return HttpResponse('Go To Login Screen')
+    return redirect(login_)
 @csrf_exempt
 def join_form(request):
     if request.user.is_authenticated():
@@ -84,7 +83,7 @@ def join_form(request):
             stud_id = request.user , time_stamp = timezone.now())
         return redirect(user_home)
 
-    return redirect(index)
+    return redirect(login_)
 
 @csrf_exempt
 def create_form(request):
@@ -100,5 +99,5 @@ def create_form(request):
             ins_id = request.user , time_stamp = timezone.now())
         return redirect(user_home)
 
-    return redirect(index)
+    return redirect(login_)
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Piazza</title>
+	<title>For'dis - A Discussion Forum</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0"/>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
@@ -53,8 +53,9 @@
     margin-bottom: 5px;
     margin-top: 5px;
     height: 30px;
-    width:70%;
+    width:60%;
     padding: 3px;
+    padding-right: 10%;
 }
 #newpost{
     height: 30px;
@@ -67,14 +68,14 @@
 <body>
 
    <nav class="light-blue lighten-1" role="navigation">
-    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Piazza</a>
+    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">For'dis</a>
         <ul class="right hide-on-med-and-down">
-            <li><a href="#">My Classes</a></li>
+            <li><a href="home">My Classes</a></li>
             <li><a href="logout">Logout</a></li>
         </ul>
 
         <ul id="nav-mobile" class="side-nav">
-            <li><a href="#">My Classes</a></li> 
+            <li><a href="home">My Classes</a></li> 
             <li><a href="login">Logout</a></li>
      </ul>
      <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
@@ -111,6 +112,7 @@
     </ul>
     </div>
 <div class="col s8" id="content">
+    <h5>Course id:  {{course_id}}</h5>
     <h3>What is a question?</h3>
     <p>A question is a linguistic expression used to make a request for information, or the request made using such an expression. The information requested is provided in the form of an answer.<br><br>Questions have developed a range of uses that go beyond the simple eliciting of information from another party. Rhetorical questions, for example, are used to make a point, and are not expected to be answered. Many languages have special grammatical forms for questions (for example, in the English sentence "Are you happy?", the inversion of the subject you and the verb are shows it to be a question rather than a statement). However, questions can also be asked without using these interrogative grammatical structures – for example one may use an imperative, as in "Tell me your name".</p>
 
