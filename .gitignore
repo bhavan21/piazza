@@ -3,4 +3,4 @@ class/__pycache__/
 piazza/__pycache__/
 .idea/
 projectProposal/
-db.sqlite3
+db*
