@@ -1,14 +1,17 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'class/materialize.min.css' %}" type="text/css" >
+
+    <script src="{% static 'class/materialize.min.js' %}"></script>
+
 </head>
 <body>
 
  <nav class="light-blue lighten-1" role="navigation">
-    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Piazza</a>
+    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">For'Dis</a>
       <ul class="right hide-on-med-and-down">
         <li><a href="#">Login</a></li>
         <li><a href="register">Register</a></li>
@@ -42,7 +45,7 @@
     </form>
     <div class="col s3"></div>
   </div>
-  
+
 
 </body>
 </html>

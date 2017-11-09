@@ -120,4 +120,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-SESSION_COOKIE_AGE = 1209600 #expire in 2 weeks
+SESSION_COOKIE_AGE = 1209600  # expire in 2 weeks
