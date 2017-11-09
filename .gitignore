@@ -1,3 +1,4 @@
 class/migrations/
 class/__pycache__/
 piazza/__pycache__/
+piazza/db.sqlite3
