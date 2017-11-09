@@ -1,0 +1,176 @@
+{% load static %}
+<html>
+<head>
+    <link rel="stylesheet" href="{% static 'class/materialize.min.css' %}">
+
+    <script type="text/javascript" src="{% static 'class/jquery-3.2.1.min.js' %}"></script>
+	<script src="{% static 'class/materialize.min.js' %}"></script>
+    <script >
+	    $(document).ready(function() {
+            $('#modal_join').modal();
+            $('#modal_create').modal();
+            $('#select_semester').material_select();
+	        $( "#datepicker" ).material_select();
+        });
+    </script>
+</head>
+<body>
+<nav>
+    <div class="nav-wrapper">
+      <a href="index" class="brand-logo">For'Dis</a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li><a href="sass.html">{{first_name}}</a></li>
+        <li><a href="badges.html">{{last_name}}</a></li>
+        <li><a href="logout">Log Out</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="chip">
+      Instructor Role :
+  </div>
+
+
+
+
+  <!-- Modal Structure -->
+		  <div id="modal_join" action="index" class="modal">
+		    <div class="modal-content">
+
+			 <div class="row">
+			    <form class="col s12" method="post" action="join_form">
+			    	<!-- {% csrf_token %} -->
+				      <div class="row">
+				        <div class="input-field col s6">
+				          <input id="class_code" name="codein" type="text" class="validate">
+				          <label >classcode</label>
+				        </div>
+				      </div>
+				      <div class="row">
+				        <div class="input-field col s6">
+				          <input id="pass_code" name="codeout" type="text" class="validate">
+				          <label >passcode</label>
+				        </div>
+				      </div>
+				    <div class="center-align vertical-align">
+				 	     <input type="submit" class="modal-action  green modal-close waves-effect waves-yellow btn-flat" value="Join" >
+					</div>
+			    </form>
+			  </div>
+			</div>
+<!-- 		    <div class="modal-footer">
+		    </div> -->
+		  </div>
+
+  <!-- Modal Structure -->
+		  <div id="modal_create" action="index" class="modal">
+		    <div class="modal-content">
+
+			 <div class="row">
+			    <form class="col s12" method="post" action="create_form">
+			    	<!-- {% csrf_token %} -->
+				      <div class="row">
+				        <div class="input-field col s6">
+				          <input id="class_name_create" name="classname" type="text" class="validate">
+				          <label >Course Name</label>
+				        </div>
+				      </div>
+				      <div class="row">
+				        <div class="input-field col s6">
+				          <input id="class_code_create" name="classcode" type="text" class="validate">
+				          <label >Course Code</label>
+				        </div>
+				      </div>
+				      <div class="row">
+						<div class="input-field col s6">
+						    <select id="select_semester" name="semester">
+						      <option value="" disabled selected>Choose your option</option>
+						      <option value="Autumn">Autumn</option>
+						      <option value="Spring">Spring</option>
+						      <option value="Summer">Summer</option>
+						    </select>
+						    <label>Semester</label>
+						  </div>
+						<div class="input-field col s6">
+						    <select id="datepicker" name="year">
+						      <option value="" disabled selected>Choose Year</option>
+						      <option value="2017">2017</option>
+						      <option value="2015">2015</option>
+						      <option value="2016">2016</option>
+						      <option value="2018">2018</option>
+						      <option value="2019">2019</option>
+						    </select>
+						    <label>Year</label>
+						  </div>
+						 </div>
+						<br>
+				    <div class="center-align vertical-align">
+				 	     <input type="submit" class="modal-action  green modal-close waves-effect waves-yellow btn-flat" value="Create" >
+					</div>
+			    </form>
+			  </div>
+			</div>
+<!-- 		    <div class="modal-footer">
+		    </div> -->
+		  </div>
+
+
+      <div class="row" id = 'instructor_class'>
+
+	           {% for akh in instructor_class %}
+
+	        <div class="col s12 m3">
+	          <div class="card blue-grey darken-1">
+	            <div class="card-content white-text">
+	              <span class="card-title">{{akh.class_id.course_code}}</span>
+	              <p>
+	              	{{akh.class_id.course_name}}
+	              </p>
+	            </div>
+
+	            <div class="card-action">
+	              <span class = "black-text" >{{akh.class_id.semester}} , {{akh.class_id.year}} </span>
+	              <a href="#">Settings</a>
+	            </div>
+	          </div>
+	        </div>
+
+
+	          {% endfor %}
+	<a class="btn-floating waves-effect waves-light btn-large red btn modal-trigger" onclick="$('#modal_create').modal('open')"><i class="material-icons">+</i></a>
+      </div>
+  <div class="chip">
+    <!-- <img src="images/yuna.jpg" alt="Contact Person"> -->
+      Student Role :
+  </div>
+      <div class="row" id = 'student_class'>
+
+	           {% for akh in student_class %}
+
+	        <div class="col s12 m3">
+	          <div class="card blue-grey darken-1">
+	            <div class="card-content white-text">
+	              <span class="card-title">{{akh.class_id.course_code}}</span>
+	              <p>
+	              	{{akh.class_id.course_name}}
+	              </p>
+	            </div>
+	            <div class="card-action">
+	              <span class = "black-text" >{{akh.class_id.semester}} , {{akh.class_id.year}} </span>
+	              <a href="#">Activity</a>
+	            </div>
+	          </div>
+	        </div>
+
+	          {% endfor %}
+		    <div class="col s12 m3">
+		    	<div class="card-content">
+		   		 <a  class="btn-floating waves-effect waves-light btn-large red btn modal-trigger" onclick="$('#modal_join').modal('open')"><i class="material-icons">+</i></a>
+		   		</div>
+		    </div>
+
+      </div>
+
+
+</body>
+</html>

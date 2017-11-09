@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponseRedirect
+from django.urls import reverse
 from django.template import loader
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
@@ -13,9 +14,9 @@ loginURL = '/class/login'
 
 @csrf_exempt
 def login_(request):
-	# print(request.session.get_expire_at_browser_close())
 	if request.session.get("id") is not None:
-		return redirect(index)
+		# return HttpResponseRedirect(reverse('class:userhome'))
+		return redirect(userhome)
 	if request.method == 'POST':
 		email = request.POST.get("email")
 		password = request.POST.get("password")
@@ -24,7 +25,7 @@ def login_(request):
 			request.session["name"] = user.first_name + " " + user.last_name
 			request.session["id"] = user.id
 			login(request, user)
-			return redirect(index)
+			return redirect(userhome)
 		else:
 			return render(request, 'class/login.html', {"error": "Wrong Credentials"})
 	return render(request, 'class/login.html', {})
@@ -33,7 +34,7 @@ def login_(request):
 @csrf_exempt
 def register(request):
 	if request.session.get("id") is not None:
-		return redirect(index)
+		return redirect(userhome)
 	if request.method == 'POST':
 		first_name = request.POST.get("first_name")
 		last_name = request.POST.get("last_name")
@@ -46,20 +47,26 @@ def register(request):
 			request.session["name"] = first_name + " " + last_name
 			request.session["id"] = user.id
 			login(request, user)
-			return redirect(index)
+			return redirect(userhome)
 		else:
 			return render(request, 'class/register.html', {"error": "Error while signing up. Please try again"})
 	return render(request, 'class/register.html', {})
 
 
 @login_required(login_url=loginURL)
-def index(request):
-	context = {}
-	return render(request, 'class/index.html', context)
+def userhome(request):
+	std_class = Joins.objects.filter(stud_id=request.user)
+	ins_class = ClassInsRelation.objects.filter(ins_id=request.user)
+	return render(request, 'class/userhome.html', {
+													'instructor_class': ins_class,
+													'student_class': std_class,
+													'first_name': request.user.first_name,
+													'last_name': request.user.last_name
+												})
 
 
 @login_required(login_url=loginURL)
-def home(request, class_code):
+def classhome(request, class_code):
 	if request.session.get("id") is not None:
 		sessionid = request.session.get("id")
 
@@ -93,15 +100,41 @@ def home(request, class_code):
 				}
 				context["posts"].append(newobj)
 
-			return render(request, 'class/home.html', context)
+			return render(request, 'class/userhome.html', context)
 		else:
 			context = {
 				'posts': [],
 				'error': 'This class is not taken by you'
 			}
-			return render(request, 'class/home.html', context)
+			return render(request, 'class/userhome.html', context)
 	else:
-		return render(request, 'class/login.html', {"error": "You are not logged in! Please login "})
+		return redirect(login_)
+
+
+@csrf_exempt
+@login_required(login_url=loginURL)
+def join_form(request):
+	class_code = request.POST['codein']
+	pass_code = request.POST['codeout']
+	class_to_join = Class.objects.filter(class_code=class_code, class_password=pass_code)
+	if not class_to_join:
+		return HttpResponse("No Class Exists")
+	var = Joins.objects.filter(class_id=class_to_join.first(), stud_id=request.user)
+	if not var:
+		Joins.objects.create(class_id=class_to_join.first(), stud_id=request.user, time_stamp=datetime.datetime.now())
+	return redirect(userhome)
+
+
+@csrf_exempt
+@login_required(login_url=loginURL)
+def create_form(request):
+	class_code = request.POST['classcode']
+	class_name = request.POST['classname']
+	semester = request.POST['semester']
+	year = request.POST['year']
+	some = Class.objects.create(course_name=class_name, course_code=class_code, year=year, semester=semester)
+	ClassInsRelation.objects.create(class_id=some, ins_id=request.user, time_stamp=datetime.datetime.now())
+	return redirect(userhome)
 
 
 def logout_(request):
