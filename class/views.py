@@ -15,8 +15,7 @@ loginURL = '/class/login'
 @csrf_exempt
 def login_(request):
 	if request.session.get("id") is not None:
-		return HttpResponseRedirect(reverse('class:userhome'))
-		# return redirect(userhome)
+		return redirect('class:userhome')
 	if request.method == 'POST':
 		email = request.POST.get("email")
 		password = request.POST.get("password")
@@ -25,8 +24,7 @@ def login_(request):
 			request.session["name"] = user.first_name + " " + user.last_name
 			request.session["id"] = user.id
 			login(request, user)
-			return HttpResponseRedirect(reverse('class:userhome'))
-			# return redirect(userhome)
+			return redirect('class:userhome')
 		else:
 			return render(request, 'class/login.html', {"error": "Wrong Credentials"})
 	return render(request, 'class/login.html', {})
@@ -35,8 +33,7 @@ def login_(request):
 @csrf_exempt
 def register(request):
 	if request.session.get("id") is not None:
-		return HttpResponseRedirect(reverse('class:userhome'))
-		# return redirect(userhome)
+		return redirect('class:userhome')
 	if request.method == 'POST':
 		first_name = request.POST.get("first_name")
 		last_name = request.POST.get("last_name")
@@ -49,8 +46,7 @@ def register(request):
 			request.session["name"] = first_name + " " + last_name
 			request.session["id"] = user.id
 			login(request, user)
-			return HttpResponseRedirect(reverse('class:userhome'))
-			# return redirect(userhome)
+			return redirect('class:userhome')
 		else:
 			return render(request, 'class/register.html', {"error": "Error while signing up. Please try again"})
 	return render(request, 'class/register.html', {})
@@ -111,8 +107,7 @@ def classhome(request, class_code):
 			}
 			return render(request, 'class/classhome.html', context)
 	else:
-		return HttpResponseRedirect(reverse('class:login_'))
-		# return redirect(login_)
+		return redirect(('class:login_'))
 
 
 @csrf_exempt
@@ -126,8 +121,7 @@ def join_form(request):
 	var = Joins.objects.filter(class_id=class_to_join.first(), stud_id=request.user)
 	if not var:
 		Joins.objects.create(class_id=class_to_join.first(), stud_id=request.user, time_stamp=datetime.datetime.now())
-	return HttpResponseRedirect(reverse('class:userhome'))
-	# return redirect(userhome)
+	return redirect('class:userhome')
 
 
 @csrf_exempt
@@ -139,11 +133,9 @@ def create_form(request):
 	year = request.POST['year']
 	some = Class.objects.create(course_name=class_name, course_code=class_code, year=year, semester=semester)
 	ClassInsRelation.objects.create(class_id=some, ins_id=request.user, time_stamp=datetime.datetime.now())
-	return HttpResponseRedirect(reverse('class:userhome'))
-	# return redirect(userhome)
+	return redirect('class:userhome')
 
 
 def logout_(request):
 	logout(request)		# logout flushes the session
-	return HttpResponseRedirect(reverse('class:login_'))
-	# return redirect(login_)
+	return redirect('class:login_')
