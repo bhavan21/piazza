@@ -4,10 +4,10 @@
 #sidebar{
     border-right: 2px solid #000000;
     position: absolute;
-    top:10%;
+    top:12%;
     left:0;
     width: 28%;
-    height: 90%;
+    height: 88%;
     overflow-y: auto;
 
 }
