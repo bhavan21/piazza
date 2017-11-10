@@ -1,9 +1,13 @@
-/* fallback */
 @font-face {
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/materialicons/v31/2fcrYFNaTjcS6g4U3t-Y5ZjZjT5FdEJ140U2DJYC3mY.woff2) format('woff2');
+  src: url(https://example.com/MaterialIcons-Regular.eot); /* For IE6-8 */
+  src: local('Material Icons'),
+    local('MaterialIcons-Regular'),
+    url(iconFonts/MaterialIcons-Regular.woff2) format('woff2'),
+    url(iconFonts/MaterialIcons-Regular.woff) format('woff'),
+    url(iconFonts/MaterialIcons-Regular.ttf) format('truetype');
 }
 
 .material-icons {

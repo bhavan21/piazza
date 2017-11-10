@@ -38,8 +38,9 @@
     margin-bottom: 5px;
     margin-top: 5px;
     height: 30px;
-    width:70%;
+    width:60%;
     padding: 3px;
+    padding-right: 10%;
 }
 #newpost{
     height: 30px;
