@@ -4,101 +4,333 @@
 <head>
 	<title>ForDis</title>
     <meta charset="utf-8">
+
+    <!-- The following line tell browser that the page is mobile friendly -->
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0"/>
-	<link rel="stylesheet" href="{% static 'class/materialize.min.css' %}" type="text/css" >
+
+    <!-- Materialize css and materialize icons -->
+    <link rel="stylesheet" href="{% static 'class/materialize.min.css' %}" type="text/css" >
     <link rel="stylesheet" href="{% static 'class/iconFamilyMaterialIcons.css' %}" type="text/css" >
+
+    <!-- Rich text editor css files -->
     <link rel="stylesheet" href="{% static 'class/font-awesome.min.css' %}" type="text/css" />
     <link rel="stylesheet" href="{% static 'class/codemirror.min.css' %}" type="text/css" >
     <link rel="stylesheet" href="{% static 'class/froala_editor.pkgd.min.css' %}"  type="text/css" />
     <link rel="stylesheet" href="{% static 'class/froala_style.min.css' %}" type="text/css" />
+
+    <!-- Date-time picker css -->
+    <link rel="stylesheet" href="{% static 'class/material-datetime-picker.css' %}">
+
+    <!-- Custom css file -->
     <link rel="stylesheet" href="{% static 'class/classhome.css' %}" type="text/css"/>
 
-	<script src="{% static 'class/materialize.min.js' %}"></script>
+   
+    <style type="text/css">
+        .c-datepicker{z-index: 99 !important};
+    </style>
+
+    <style type="text/css">
+        .wrap{
+            word-wrap: break-word;
+            white-space: wrap;
+        }
+    </style>
+
+    <!-- Jquery Library-->
+    <script type="text/javascript" src="{% static 'class/jquery.min.js' %}"></script>
+
+    <!-- Script for showing 100 characters at maximum for description of a post in sidebar -->
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var showChar = 100;
+            var ellipsestext = "...";
+            $('.item').each(function() {
+                
+                var content = $(this).html();
+                if(content.length > showChar) {
+                    // console.log($(this).html());
+                    var c = content.substr(0, showChar);
+                    var h = content.substr(showChar, content.length - showChar);
+
+                    var html = c ;
+                    
+                    html=html+ ellipsestext;
+
+                    $(this).html(html);
+                }
+            });
+        });
+    </script>
 
 </head>
 
 <body>
 
+    {{error}}
+
+    <!-- Navigation bar -->
    <nav class="light-blue lighten-1" role="navigation">
-    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">For'Dis</a>
-        <ul class="right hide-on-med-and-down">
-            <li><a href="/class">My Classes</a></li>
-            <li><a href="logout">Logout</a></li>
-        </ul>
+        <div class="nav-wrapper container"><a id="logo-container" href="/class" class="brand-logo">For'Dis</a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="/class">My Classes</a></li>
+                <li><a href="logout">Logout</a></li>
+            </ul>
 
-        <ul id="nav-mobile" class="side-nav">
-            <li><a href="/class">My Classes</a></li>
-            <li><a href="logout">Logout</a></li>
-     </ul>
-     <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
- </div>
-</nav>
-
- <!-- <div class="card-panel teal lighten-2">This is a card panel with a teal lighten-2 class</div> -->
-
-<!-- <div style="background-color:grey;padding: 3px; ">
-    <div class="chip">lab1</div>
-    <div class="chip">lab1</div>
-    <div class="chip">lab1</div>
-    <div class="chip">lab1</div>
-</div> -->
-
-
-<div  id="sidebar">
-
-    <button id=newpost><span style="font-size: 14px;display: inline-block;">New Post</span></button>
-
-
-    <input id="search-box"  placeholder="Search..."  name="search"/>
-    <a href="#"><i id="search-icon" class="small material-icons">search</i></a>
-
-
-
-    <ul class="collection" style="margin-top: 0px;">
-    {% for i in "123456789" %}
-    <li class="collection-item post" onclick="changeurl({{i}})">
-        <b>Heading</b><br>
-        Description Description Description Description. Description...
-    </li>
-    {% endfor %}
-    </ul>
-    </div>
-<div class="col s8" id="content">
-    <h3>What is a question?</h3>
-    <p>A question is a linguistic expression used to make a request for information, or the request made using such an expression. The information requested is provided in the form of an answer.<br><br>Questions have developed a range of uses that go beyond the simple eliciting of information from another party. Rhetorical questions, for example, are used to make a point, and are not expected to be answered. Many languages have special grammatical forms for questions (for example, in the English sentence "Are you happy?", the inversion of the subject you and the verb are shows it to be a question rather than a statement). However, questions can also be asked without using these interrogative grammatical structures – for example one may use an imperative, as in "Tell me your name".</p>
-
-    <h5>Join the discusion</h5>
-   <!--  <div class="row" >
-        <div class="input-field col s12">
-          <input name="comment" type="text" placeholder="Comment" class="validate">
+            <ul id="nav-mobile" class="side-nav">
+                <li><a href="/class">My Classes</a></li>
+                <li><a href="logout">Logout</a></li>
+            </ul>
+            <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
         </div>
-      </div> -->
+    </nav>
 
-    <textarea id="froala-editor"></textarea>
+    <!-- Side bar -->
+    <div  id="sidebar">
 
+        <!-- New post button -->
+        <button id=newpost onclick="newpost_page()"><span style="font-size: 14px;display: inline-block;">New Post</span></button>
+
+        <!-- Search bar -->
+        <input id="search-box"  placeholder="Search..."  name="search"/>
+        <a href="#"><i id="search-icon" class="small material-icons">search</i></a>
+
+        <!-- List of posts -->
+        <ul class="collection" style="margin-top: 0px;">
+            {% for i in posts %}
+            <li class="collection-item post" onclick="changeurl({{i.post.id}})">
+                <b>{{i.post.title}}</b><br>
+                <div class="wrap item">{{i.post.content}}</div>
+            </li>
+            {% endfor %}
+        </ul>
 </div>
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/codemirror.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/mode/xml/xml.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/froala-editor/2.6.0//js/froala_editor.pkgd.min.js"></script>
+    <!-- Content -->
+    <div id="content" style="padding-bottom: 50px;">
+
+        <!-- Block for showing a question/post (Initially display none) -->
+        <div id="existing-question" style="display: none;">
+
+            <!-- Question/post -->
+            <h3 id="question-title"></h3>
+            <div id="question-content" class="wrap"></div>
+
+            <!-- Comments for the Post -->
+            <h5>Comments</h5>
+            <!-- Comments will be loaded into this div element -->
+            <div id="comments"></div>
+
+            <!-- Text editor to post a new comment -->
+            <h5>Join the discusion</h5>
+            <textarea id="froala-editor-comment" name="des"></textarea>
+
+            <!-- Post comment button -->
+            <button id="post-comment" data-postid="trwtae" type="button" style="float: right;margin: 10px;" class="btn waves-effect waves-light" >Comment<i class="material-icons right">send</i></button>
+
+        </div>
+        <!-- Block for showing a question/post ends -->
+
+        <!-- div to post a new post (display is initially none)-->
+        <div id="new-question" style="display: none;">
+            <h5>Post a question</h5>
+            <!-- This form is being submitted by Jquery -->
+            <form id="new-question-form">
+
+                <!-- Title of the post-->
+                <h6>Summary:</h6>
+                <input type="text" id="post-title" name="title" style="padding-left: 10px; border:1px solid #000000" />
+
+                <!-- Content of the post-->
+                <h6>Details:</h6>
+                <textarea id="froala-editor-newquestion" name="des"></textarea>
+
+                <div class="center-align vertical-align" style="margin: 10px;">
+                    <!-- <a class="c-datepicker-btn">
+                        <span class="material-icon">Open date picker</span>
+                    </a>
+                    <pre id="output"></pre> -->
+
+                    <!-- Button to post the question -->
+                    <button id="post-question" type="button" class="btn waves-effect waves-light" >Post My question<i class="material-icons right">send</i></button>
+
+                    <!-- Button to post the question as a draft -->
+                    <button id="post-draft" type="button" class="btn waves-effect waves-light" >Save as Draft<i class="material-icons right">sdrafts</i></button>
+                </div>
+            </form>
+        </div>
+        <!-- div to post a new post ends -->
+
+    </div>
+    <!-- Content ends -->
+
+<!-- Materialize JS -->
+<script src="{% static 'class/materialize.min.js' %}"></script>
+
+<!-- Rich text editor JS -->
+<script type="text/javascript" src="{% static 'class/codemirror.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'class/xml.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'class/froala_editor.pkgd.min.js' %}"></script>
+
+<!-- Date-time picker JS -->
+<script src="{% static 'class/rome.js' %}"></script>
+<script src="{% static 'class/moment.js' %}"></script>
+<script src="{% static 'class/material-datetime-picker.js' %}" charset="utf-8"></script>
 
 <script type="text/javascript">
- function changeurl(i) {
-    var title="title";
-    var content="content of question "+i;
-    var urlPath="hi"+i
-    document.getElementById("content").innerHTML = content;
-    document.title = title;
-    window.history.pushState({"html":content,title},"", urlPath);
-}
-window.onpopstate = function(e){
-    if(e.state){
-        document.getElementById("content").innerHTML = e.state.html;
-        document.title = e.state.pageTitle;
+
+    // this function is called when a post in side bar is clicked or when url has a numeric postid
+    function changeurl(post_id) {
+
+        // ajax call to load required post along with its comments
+        $.ajax({
+            type: "GET",
+            url: "/class/get_post",
+            data:{
+                    post_id: post_id,
+                    class_code: "{{class_code}}"
+                },
+         success:function(data){
+            var obj = JSON.parse(data);
+
+            // displaying the block to show the question/post
+            $("#new-question").css("display","none");
+            $("#existing-question").css("display","block");
+
+            // Loading the question and its comments into content block
+            var post_id = obj.id;
+            var title=obj.title;
+            var content=obj.content;
+            $("#question-title").html(title);
+            $("#question-content").html(content);
+            $("#post-comment").attr("data-postid",post_id);
+            $("#comments").html("");
+            $.each(obj.comments, function () {
+                var comment = "<div class=wrap style=background-color:#F5E5C0;padding:5px;padding-left:15px;margin:10px;>"+this.content+"</div>";
+                $("#comments").append(comment);
+             });
+
+            // changing the url locally to the url corresponding to the post
+            var urlPath=post_id;
+            document.title = title;
+            window.history.pushState({"html":title,content},"", urlPath);
+            // alert("Data: " + data + "\nStatus: " + status);
+        },
+
+        // if error, load the home page of the class
+        error: function(xhr, statusText){
+                alert("The post you are looking for doesn't exist");
+                var urlPath="../{{class_code}}/";
+                document.title = "ForDis";
+                window.history.pushState({"html":"ForDis"},"", urlPath);
+            }
+            
+        });
     }
-};
-$(function() {
-  $('textarea#froala-editor').froalaEditor()
+
+
+    // this function is called when newpost button is clicked
+    function newpost_page(){
+        var urlPath="newpost";
+        document.title = "New Post";
+        window.history.pushState({"html":"New Post"},"", urlPath);
+        $("#existing-question").css("display","none");
+        $("#new-question").css("display","block");
+    };
+
+    // function called when the page is loaded and postid in url is non numeric
+    function redirect_to_home(){
+        // var urlPath="yoyo";
+        // document.title = "ForDisdd";
+        // window.history.pushState({"html":"ForDis"}, urlPath);
+        alert("The post you are looking for doesn't exist!");
+        window.location.href="../{{class_code}}";
+    }
+
+
+    // function to add locally changed urls to browser stack(for navigating pages in a tab)
+    window.onpopstate = function(e){
+        if(e.state){
+            document.getElementById("content").innerHTML = e.state.html;
+            document.title = e.state.pageTitle;
+        }
+    };
+
+    // loading the rich text editors on page load
+    $(function() {
+        $('textarea#froala-editor-newquestion').froalaEditor();
+        $('textarea#froala-editor-comment').froalaEditor()
+
+    });
+
+
+    $( document ).ready(function(){
+
+        // parsing the url on pageload and displaying the appropriate post in content block
+        var urlparse = window.location.pathname.split("/");
+        // alert(urlparse[3]);
+        tail=urlparse[3];
+        if(tail=="newpost"){
+            newpost_page();
+        }else if($.isNumeric(tail)){
+            changeurl(tail);
+        }else if(tail!=""){
+            redirect_to_home();
+        }
+
+
+        // function to post a new post
+        $("#post-question").click(function(){
+            $("#post-question").prop('disabled',true);
+            $.post("/class/new_post",
+            {
+                title: $('#post-title').val(),
+                content: $('#froala-editor-newquestion').froalaEditor('html.get'),
+                class_code: "{{class_code}}"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                    location.reload();
+                }
+                $("#post-question").prop('disabled',false);
+            });   
+        });
+
+        // function to post a comment
+        $("#post-comment").click(function(){
+            $("#post-comment").prop('disabled',true);
+            $.post("/class/new_comment",
+            {
+                post_id: $('#post-comment').attr('data-postid'),
+                content: $('#froala-editor-comment').froalaEditor('html.get'),
+                class_code: "{{class_code}}"
+            },
+            function(data, status){
+                if(status == "success"){
+                    location.reload();
+                }
+                $("#post-comment").prop('disabled',false);
+            });
+        });
 });
+
 </script>
+
+<!-- script for date-time picker  -->
+<!-- <script>
+
+    var picker = new MaterialDatetimePicker({})
+    .on('submit', function(d) {
+        output.innerText = d;
+    });
+
+    var el = document.querySelector('.c-datepicker-btn');
+    el.addEventListener('click', function() {
+        document.getElementById("froala-editor").style.opacity="0.5";
+        picker.open();
+    }, false);
+
+</script> -->
 
 </body>
 </html>

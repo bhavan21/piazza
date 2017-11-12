@@ -134,7 +134,7 @@
 	<div class="col s12 m3">
 
 		<div class="card blue-grey darken-1">
-			<a href="1">
+			<a href={{akh.class_id.course_code}}>
 				<div class="card-content white-text">
 					<span class="card-title">{{akh.class_id.course_code}}</span>
 					<p>
@@ -168,12 +168,14 @@
 
 	<div class="col s12 m3">
 		<div class="card blue-grey darken-1">
-			<div class="card-content white-text">
-				<span class="card-title">{{akh.class_id.course_code}}</span>
-				<p>
-					{{akh.class_id.course_name}}
-				</p>
-			</div>
+			<a href={{akh.class_id.course_code}}>
+				<div class="card-content white-text">
+					<span class="card-title">{{akh.class_id.course_code}}</span>
+					<p>
+						{{akh.class_id.course_name}}
+					</p>
+				</div>
+			</a>
 			<div class="card-action">
 				<span class = "black-text" >{{akh.class_id.semester}} , {{akh.class_id.year}} </span>
 				<a href="#"  style="float: right;">Activity</a>
