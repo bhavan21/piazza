@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from .models import Class,ClassInsRelation,Joins,Topic,Post,ViewRelation,PinRelation,TopicPostRelation,Comment,Poll,Option,OptionStudRelation
 import json
 from datetime import datetime
+from django.utils import timezone
 from django.utils.crypto import get_random_string
 
 
@@ -42,10 +43,17 @@ def login_(request):
 			request.session["name"] = user.first_name + " " + user.last_name
 			request.session["id"] = user.id
 			login(request, user)
-			return redirect('class:userhome')
+			if request.POST.get("next") is not None:
+				return redirect(request.POST.get("next"))
+			else:
+				return redirect('class:userhome')
 		else:
 			return render(request, 'class/login.html', {"error": "Wrong Credentials"})
-	return render(request, 'class/login.html', {})
+	if request.GET.get("next") is not None:
+		context = {'next': request.GET.get("next")}
+	else:
+		context={}
+	return render(request, 'class/login.html', context)
 
 
 @csrf_exempt
@@ -88,7 +96,7 @@ def classhome(request, class_code):
 		user_id = request.session.get("id")
 		if is_class_taken(user_id,class_code):
 			posts = Post.objects.filter(
-						time_stamp__lt=datetime.now(),
+						time_stamp__lt=timezone.now(),
 						class_id__class_code__exact=class_code
 					).order_by('-time_stamp')
 
@@ -101,9 +109,9 @@ def classhome(request, class_code):
 				temp = ViewRelation.objects.filter(user_id=user_id, post_id=i.id).count()
 
 				if temp > 0:
-					seen = 1
+					seen = True
 				else:
-					seen = 0
+					seen = False
 
 				newobj = {
 					"post": i,
@@ -132,7 +140,7 @@ def join_form(request):
 		return HttpResponse("No Class Exists")
 	var = Joins.objects.filter(class_id=class_to_join.first(), stud_id=request.user)
 	if not var:
-		Joins.objects.create(class_id=class_to_join.first(), stud_id=request.user, time_stamp=datetime.datetime.now())
+		Joins.objects.create(class_id=class_to_join.first(), stud_id=request.user, time_stamp=timezone.now())
 	return redirect('class:userhome')
 
 
@@ -149,7 +157,7 @@ def create_form(request):
 		if not matched:
 			break
 	some = Class.objects.create(course_name=class_name, course_code=course_code, year=year, semester=semester,class_code=class_code)
-	ClassInsRelation.objects.create(class_id=some, ins_id=request.user, time_stamp=datetime.now())
+	ClassInsRelation.objects.create(class_id=some, ins_id=request.user, time_stamp=timezone.now())
 	return redirect('class:userhome')
 
 
@@ -164,7 +172,7 @@ def new_post(request):
 		class_object = Class.objects.get(class_code=class_code)
 		posted_by= User.objects.get(id=user_id)
 		
-		Post.objects.create(class_id=class_object,posted_by=posted_by,title=title,content=content,time_stamp=datetime.now())
+		Post.objects.create(class_id=class_object,posted_by=posted_by,title=title,content=content,time_stamp=timezone.now())
 		return HttpResponse("success")
 	else:
 		return HttpResponse("Failed")
@@ -179,6 +187,14 @@ def get_post(request):
 	if is_class_taken(user_id,class_code) and is_post_in_class:
 		post = Post.objects.get(id=post_id)
 		comments = Comment.objects.filter(post_id=post).order_by('time_stamp')
+
+		isread=ViewRelation.objects.filter(user_id=user_id, post_id=post_id)
+		if not isread:
+			user_object=User.objects.get(id=user_id)
+			ViewRelation.objects.create(user_id=user_object,post_id=post)
+			post.views=post.views+1
+			post.save()
+
 		data={}
 		data["id"]=post.id
 		data["title"]=post.title
@@ -208,7 +224,7 @@ def new_comment(request):
 		content = request.POST['content']
 		posted_by= User.objects.get(id=user_id)
 		post = Post.objects.get(id=post_id)
-		Comment.objects.create(post_id=post, posted_by=posted_by,content=content,time_stamp=datetime.now())
+		Comment.objects.create(post_id=post, posted_by=posted_by,content=content,time_stamp=timezone.now())
 		return HttpResponse("success")
 	else:
 		return HttpResponse("Failed")

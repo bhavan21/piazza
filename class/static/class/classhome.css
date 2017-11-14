@@ -23,7 +23,7 @@
 }
 .post:hover{
     cursor: pointer;
-    background-color: #F5E5C0;
+    background-color: #fcf6e9;
 }
 #search-icon {
     float: right;
@@ -49,3 +49,13 @@
     color: white;
     padding: 3px;
 }
+
+.active-post{
+    background: #f5e4bd !important;
+}
+
+.unread-post{
+    color:#0099cc;
+}
+
+

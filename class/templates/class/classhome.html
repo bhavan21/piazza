@@ -73,12 +73,12 @@
         <div class="nav-wrapper container"><a id="logo-container" href="/class" class="brand-logo">For'Dis</a>
             <ul class="right hide-on-med-and-down">
                 <li><a href="/class">My Classes</a></li>
-                <li><a href="logout">Logout</a></li>
+                <li><a href="/class/logout">Logout</a></li>
             </ul>
 
             <ul id="nav-mobile" class="side-nav">
                 <li><a href="/class">My Classes</a></li>
-                <li><a href="logout">Logout</a></li>
+                <li><a href="/class/logout">Logout</a></li>
             </ul>
             <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
         </div>
@@ -96,8 +96,19 @@
 
         <!-- List of posts -->
         <ul class="collection" style="margin-top: 0px;">
+           <!--   <li class="collection-item post unread-post active-post" onclick="changeurl({{i.post.id}})" style=>
+                <b >My Questiom</b><br>
+                <div class="wrap item">Content content content content</div>
+
+            </li>
+
+            <li class="collection-item post active-post" onclick="changeurl({{i.post.id}})" style="background: #f5e4bd">
+                <b style="">My Questiom</b><br>
+                <div class="wrap item" style="">Content content content content</div>
+
+            </li> -->
             {% for i in posts %}
-            <li class="collection-item post" onclick="changeurl({{i.post.id}})">
+            <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
                 <b>{{i.post.title}}</b><br>
                 <div class="wrap item">{{i.post.content}}</div>
             </li>
@@ -112,7 +123,14 @@
         <div id="existing-question" style="display: none;">
 
             <!-- Question/post -->
-            <h3 id="question-title"></h3>
+            <div class="row">
+                <div class="col s10">
+                    <h3 id="question-title"></h3>
+                </div>
+                <div class="col s2">
+                    <h3 id="question-views" class="chip"><h3>
+                </div>
+            </div>
             <div id="question-content" class="wrap"></div>
 
             <!-- Comments for the Post -->
@@ -125,7 +143,7 @@
             <textarea id="froala-editor-comment" name="des"></textarea>
 
             <!-- Post comment button -->
-            <button id="post-comment" data-postid="trwtae" type="button" style="float: right;margin: 10px;" class="btn waves-effect waves-light" >Comment<i class="material-icons right">send</i></button>
+            <button id="post-comment" data-content-postid="" type="button" style="float: right;margin: 10px;" class="btn waves-effect waves-light" >Comment<i class="material-icons right">send</i></button>
 
         </div>
         <!-- Block for showing a question/post ends -->
@@ -200,14 +218,24 @@
             var post_id = obj.id;
             var title=obj.title;
             var content=obj.content;
+            var views=obj.views;
             $("#question-title").html(title);
             $("#question-content").html(content);
-            $("#post-comment").attr("data-postid",post_id);
+            $("#question-views").html("views: "+views);
+            $("#post-comment").attr("data-content-postid",post_id);
             $("#comments").html("");
             $.each(obj.comments, function () {
                 var comment = "<div class=wrap style=background-color:#F5E5C0;padding:5px;padding-left:15px;margin:10px;>"+this.content+"</div>";
                 $("#comments").append(comment);
              });
+
+            //change the background color of the active post
+            $('.post').removeClass('active-post');
+            $(".collection").find("[data-postid='" + post_id + "']").addClass('active-post');
+
+            //removing the unread-post class from the clicked post if present
+            $(".collection").find("[data-postid='" + post_id + "']").removeClass('unread-post');
+
 
             // changing the url locally to the url corresponding to the post
             var urlPath=post_id;
@@ -301,7 +329,7 @@
             $("#post-comment").prop('disabled',true);
             $.post("/class/new_comment",
             {
-                post_id: $('#post-comment').attr('data-postid'),
+                post_id: $('#post-comment').attr('data-content-postid'),
                 content: $('#froala-editor-comment').froalaEditor('html.get'),
                 class_code: "{{class_code}}"
             },

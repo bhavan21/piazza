@@ -39,6 +39,9 @@
           <input id="password" name="password" type="password" placeholder="Password" class="validate">
         </div>
       </div>
+      {% if next %}
+      <input hidden name="next" value={{next}}>
+      {% endif %}
       <div class="row">
         <input type="submit" class="waves-effect waves-light btn" value="Login"/>
       </div>
