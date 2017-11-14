@@ -1,0 +1,61 @@
+#sidebar::-webkit-scrollbar {
+    display: none;
+}
+#sidebar{
+    border-right: 2px solid #000000;
+    position: absolute;
+    top:10%;
+    left:0;
+    width: 28%;
+    height: 90%;
+    overflow-y: auto;
+
+}
+#content{
+    position: absolute;
+    top:10%;
+    overflow-y:auto;
+    padding: 15px;
+    left:28%;
+    width: 72%;
+    height: 90%;
+    overflow-y: auto;
+}
+.post:hover{
+    cursor: pointer;
+    background-color: #fcf6e9;
+}
+#search-icon {
+    float: right;
+    margin-right: 15px;
+    margin-top: -38px;
+    position: relative;
+    z-index: 2;
+    color: green;
+}
+#search-box{
+    border:1px solid #000000;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    height: 30px;
+    width:60%;
+    padding: 3px;
+    padding-right: 10%;
+}
+#newpost{
+    height: 30px;
+    width: 25%;
+    background-color: green;
+    color: white;
+    padding: 3px;
+}
+
+.active-post{
+    background: #f5e4bd !important;
+}
+
+.unread-post{
+    color:#0099cc;
+}
+
+

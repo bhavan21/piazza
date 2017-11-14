@@ -1,4 +1,9 @@
 class/migrations/
 class/__pycache__/
 piazza/__pycache__/
+<<<<<<< HEAD
 piazza/db.sqlite3
+=======
+.idea/
+projectProposal/
+>>>>>>> a7cd484c9648fcf83b040874bf97632bc24c5391
