@@ -162,17 +162,38 @@
                 <h6>Details:</h6>
                 <textarea id="froala-editor-newquestion" name="des"></textarea>
 
+                <div class="row" style="padding-top: 10px;">
+                    <div class="input-field col s3">
+                        <select>
+                        <option value="1" selected="">Bhavan Turaka</option>
+                            <option value="anonymous">Anonymous</option>
+                        </select>
+                        <label>Post as: </label>
+                    </div>
+                    <div class="col s3">
+                         <label>Date: </label>
+                        <input type="text" class="datepicker">
+                    </div>
+                    <div class="col s3">
+                        <label>Time: </label>
+                        <input type="text" class="timepicker">
+                    </div>
+
+
                 <div class="center-align vertical-align" style="margin: 10px;">
                     <!-- <a class="c-datepicker-btn">
                         <span class="material-icon">Open date picker</span>
                     </a>
                     <pre id="output"></pre> -->
 
-                    <!-- Button to post the question -->
-                    <button id="post-question" type="button" class="btn waves-effect waves-light" >Post My question<i class="material-icons right">send</i></button>
+                   <!-- Button to post the question -->
+                    <button id="post-question" type="button" class="btn waves-effect waves-light">Post My question Now<i class="material-icons right">send</i></button>
 
                     <!-- Button to post the question as a draft -->
-                    <button id="post-draft" type="button" class="btn waves-effect waves-light" >Save as Draft<i class="material-icons right">sdrafts</i></button>
+                    <button id="post-draft" type="button" class="btn waves-effect waves-light">Save as Draft<i class="material-icons right">drafts</i></button>
+
+                     <!-- Button to schedule a post -->
+                    <button type="button" class="btn waves-effect waves-light">Schedule my Post<i class="material-icons right">schedule</i></button>
                 </div>
             </form>
         </div>
@@ -197,7 +218,7 @@
 <script type="text/javascript">
 
     // this function is called when a post in side bar is clicked or when url has a numeric postid
-    function changeurl(post_id) {
+    function changeurl(post_id,push_url=true) {
 
         // ajax call to load required post along with its comments
         $.ajax({
@@ -237,54 +258,92 @@
             $(".collection").find("[data-postid='" + post_id + "']").removeClass('unread-post');
 
 
-            // changing the url locally to the url corresponding to the post
+             // changing the url locally to the url corresponding to the post
             var urlPath=post_id;
             document.title = title;
-            window.history.pushState({"html":title,content},"", urlPath);
+            data_to_restore=document.body.innerHTML;
+            if(push_url){
+                 window.history.pushState({data_to_restore},"", urlPath);
+             }else{
+                window.history.replaceState({data_to_restore},"", urlPath);
+             }
+
             // alert("Data: " + data + "\nStatus: " + status);
         },
 
         // if error, load the home page of the class
         error: function(xhr, statusText){
-                alert("The post you are looking for doesn't exist");
-                var urlPath="../{{class_code}}/";
-                document.title = "ForDis";
-                window.history.pushState({"html":"ForDis"},"", urlPath);
+                // alert("The post you are looking for doesn't exist");
+                // var urlPath="../{{class_code}}/";
+                // document.title = "ForDis";
+                // window.history.pushState({"html":"ForDis"},"", urlPath);
             }
             
         });
     }
 
-
-    // this function is called when newpost button is clicked
-    function newpost_page(){
-        var urlPath="newpost";
-        document.title = "New Post";
-        window.history.pushState({"html":"New Post"},"", urlPath);
+// this function is called when newpost button is clicked
+    function newpost_page(push_url=true){
         $("#existing-question").css("display","none");
         $("#new-question").css("display","block");
+
+         $('.post').removeClass('active-post');
+
+        var urlPath="newpost";
+        document.title = "New Post";
+        data_to_restore=document.body.innerHTML;
+        if(push_url){
+             window.history.pushState({data_to_restore},"", urlPath);
+         }else{
+            window.history.replaceState({data_to_restore},"", urlPath);
+         }
+        
     };
 
     // function called when the page is loaded and postid in url is non numeric
     function redirect_to_home(){
-        // var urlPath="yoyo";
-        // document.title = "ForDisdd";
-        // window.history.pushState({"html":"ForDis"}, urlPath);
+        
         alert("The post you are looking for doesn't exist!");
-        window.location.href="../{{class_code}}";
+        var urlPath="";
+        document.title = "ForDis";
+        data_to_restore=document.body.innerHTML;
+        window.history.replaceState({data_to_restore}, urlPath);
+        // window.location.href="../OzXE8C";
     }
 
 
     // function to add locally changed urls to browser stack(for navigating pages in a tab)
     window.onpopstate = function(e){
         if(e.state){
-            document.getElementById("content").innerHTML = e.state.html;
+            // console.log("Fired");
+            console.log(e.state)
+            document.body.innerHTML = e.state.data_to_restore;
             document.title = e.state.pageTitle;
         }
     };
 
     // loading the rich text editors on page load
     $(function() {
+        $('select').material_select();
+        $('.datepicker').pickadate({
+            selectMonths: true, // Creates a dropdown to control month
+            selectYears: 15, // Creates a dropdown of 15 years to control year,
+            today: 'Today',
+            clear: 'Clear',
+            close: 'Ok',
+            closeOnSelect: false // Close upon selecting a date,
+          });
+        $('.timepicker').pickatime({
+            default: 'now', // Set default time: 'now', '1:30AM', '16:30'
+            fromnow: 0,       // set default time to * milliseconds from now (using with default = 'now')
+            twelvehour: true, // Use AM/PM or 24-hour format
+            donetext: 'OK', // text for done-button
+            cleartext: 'Clear', // text for clear-button
+            canceltext: 'Cancel', // Text for cancel-button
+            autoclose: false, // automatic close timepicker
+            ampmclickable: true, // make AM PM clickable
+            aftershow: function(){} //Function for after opening timepicker
+          });
         $('textarea#froala-editor-newquestion').froalaEditor();
         $('textarea#froala-editor-comment').froalaEditor()
 
@@ -293,18 +352,22 @@
 
     $( document ).ready(function(){
 
-        // parsing the url on pageload and displaying the appropriate post in content block
+         // parsing the url on pageload and displaying the appropriate post in content block
         var urlparse = window.location.pathname.split("/");
         // alert(urlparse[3]);
         tail=urlparse[3];
         if(tail=="newpost"){
-            newpost_page();
+            newpost_page(false);
         }else if($.isNumeric(tail)){
-            changeurl(tail);
+            changeurl(tail,false);
         }else if(tail!=""){
             redirect_to_home();
+        }else{
+             var urlPath="";
+            document.title = "ForDis";
+            data_to_restore=document.body.innerHTML;
+            window.history.replaceState({data_to_restore}, urlPath);
         }
-
 
         // function to post a new post
         $("#post-question").click(function(){

@@ -229,6 +229,22 @@ def new_comment(request):
 	else:
 		return HttpResponse("Failed")
 
+@login_required(login_url=loginURL)
+def inst_settings(request,class_code):
+	user_id = request.session.get("id")
+	is_ins = ClassInsRelation.objects.filter(
+		class_id__class_code__exact=class_code,
+		ins_id__id__exact=user_id
+	)
+	if is_ins:
+		filtered= Joins.objects.filter(class_id__class_code__exact=class_code)
+		context={"stud_list":[]}
+		for i in filtered:
+			context["stud_list"].append(i.stud_id)
+		return render(request, 'class/settings.html', context)
+	else:
+		return HttpResponse("You aren't instructor for this class")
+
 
 def logout_(request):
 	logout(request)		# logout flushes the session
