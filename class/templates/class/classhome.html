@@ -34,6 +34,20 @@
             word-wrap: break-word;
             white-space: wrap;
         }
+        .button-background-remove{
+            background: Transparent;
+            outline: none;
+            border: none;
+            cursor:pointer;
+            overflow: hidden;
+        }
+        .button-background-remove :click{
+            background: Transparent;
+            outline: none;
+            border: none;
+            cursor:pointer;
+            overflow: hidden;
+        }
     </style>
 
     <!-- Jquery Library-->
@@ -47,6 +61,9 @@
             $('.item').each(function() {
                 
                 var content = $(this).html();
+                // var tmp = document.createElement("DIV");
+                // tmp.innerHTML = content;
+                // content=tmp.textContent || tmp.innerText || "";
                 if(content.length > showChar) {
                     // console.log($(this).html());
                     var c = content.substr(0, showChar);
@@ -95,7 +112,7 @@
         <a href="#"><i id="search-icon" class="small material-icons">search</i></a>
 
         <!-- List of posts -->
-        <ul class="collection" style="margin-top: 0px;">
+       
            <!--   <li class="collection-item post unread-post active-post" onclick="changeurl({{i.post.id}})" style=>
                 <b >My Questiom</b><br>
                 <div class="wrap item">Content content content content</div>
@@ -107,12 +124,54 @@
                 <div class="wrap item" style="">Content content content content</div>
 
             </li> -->
+
+
+            <ul class="collapsible" data-collapsible="accordion">
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">local_offer</i>Pins</div>
+                    <div class="collapsible-body" style="padding: 0px;">
+                        <span>
+                         <ul class="collection" style="margin-top: 0px;">
+                        {% for i in pins %}
+                        <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
+                            <b>{{i.post.title}}</b><br>
+                            <div class="wrap item">{{i.post.content}}</div>
+                        </li>
+                   
+                        {% endfor %}
+                        </ul>
+
+                        </span>
+                    </div>
+                </li>
+                <li>
+                  <div class="collapsible-header"><i class="material-icons">drafts</i>Drafts</div>
+                    <div class="collapsible-body" style="padding: 0px;">
+                        <span>
+                            <ul class="collection" style="margin-top: 0px;">
+                            {% for i in drafts %}
+                            <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
+                                <b>{{i.post.title}}</b><br>
+                                <div class="wrap item">{{i.post.content}}</div>
+                            </li>
+                            {% endfor %}
+                            </ul>
+
+                        </span>
+                    </div>
+                </li>
+            </ul>
+
+
+
+            <ul class="collection" style="margin-top: 0px;">
             {% for i in posts %}
             <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
                 <b>{{i.post.title}}</b><br>
                 <div class="wrap item">{{i.post.content}}</div>
             </li>
             {% endfor %}
+            </ul>
         </ul>
 </div>
 
@@ -120,18 +179,47 @@
     <div id="content" style="padding-bottom: 50px;">
 
         <!-- Block for showing a question/post (Initially display none) -->
-        <div id="existing-question" style="display: none;">
+        <div id="post-display-block" style="display: none;">
+
+
 
             <!-- Question/post -->
-            <div class="row">
-                <div class="col s10">
-                    <h3 id="question-title"></h3>
+            <div id="question-dispaly">
+                <div class="row">
+                    <div class="col s9">
+                        <h3 id="question-title"></h3>
+                    </div>
+                    <div class="col s3">
+                        <h3 id="question-views" class="chip"></h3><br>
+                        <button id="pin-post-button" class="button-background-remove" onclick="pin_question()"><i class="material-icons small" style="color: green;">local_offer</i></button>
+                        <button id="edit-post-button" class="button-background-remove" onclick="edit_question()"><i class="material-icons small" style="color: green;">edit</i></button>
+                        <button id="delete-post-button" class="button-background-remove" onclick="delete_question()"><i class="material-icons small" style="color: red;">delete</i></button>
+                    </div>
+
                 </div>
-                <div class="col s2">
-                    <h3 id="question-views" class="chip"><h3>
+                <div id="question-content" class="wrap"></div><br>
+                <div style="float: right;clear:both;margin-right:20px;">
+                    <a id="question-posted_by" style="margin-right: 20px;">Bhavan Turak</a><span id="question-time">25th July</span>
                 </div>
             </div>
-            <div id="question-content" class="wrap"></div>
+
+            <div id="question-edit"  style="display: none">
+                <h6>Summary:</h6>
+                <input type="text" id="edit-title" name="title" style="padding-left: 10px; border:1px solid #000000" />
+                <h6>Details:</h6>
+                <textarea id="froala-editor-editquestion" name="des"></textarea>
+
+                <div class="center-align vertical-align" style="margin: 10px;">
+                    <button id="save-edit-question" type="button" onclick="save_editquestion()" class="btn waves-effect waves-light">save<i class="material-icons right">send</i></button>
+
+                    <!-- Button to post the question as a draft -->
+                    <button id="cancel-edit-question" type="button" onclick="cancel_editquestion()" class="btn waves-effect waves-light">Cancel</button>
+
+                </div>  
+
+            </div>
+
+
 
             <!-- Comments for the Post -->
             <h5>Comments</h5>
@@ -142,8 +230,23 @@
             <h5>Join the discusion</h5>
             <textarea id="froala-editor-comment" name="des"></textarea>
 
+
+            <div class="row">
+            <div class="input-field col s4" >
+                <select id="comment-is-anonymous">
+                <option value="0" selected="">{{user_id.first_name}} {{user_id.last_name}}</option>
+                    <option value="1">Anonymous</option>
+                </select>
+                <label>Post as: </label>
+            </div>
+             <div class="col s4"></div>
+
             <!-- Post comment button -->
-            <button id="post-comment" data-content-postid="" type="button" style="float: right;margin: 10px;" class="btn waves-effect waves-light" >Comment<i class="material-icons right">send</i></button>
+            <div class="col s4">
+            <button id="post-comment" data-content-postid="" type="button" style="float: right;margin: 25px;" class="btn waves-effect waves-light" >Comment<i class="material-icons right">send</i></button>
+            </div>
+
+             </div>
 
         </div>
         <!-- Block for showing a question/post ends -->
@@ -164,20 +267,20 @@
 
                 <div class="row" style="padding-top: 10px;">
                     <div class="input-field col s3">
-                        <select>
-                        <option value="1" selected="">Bhavan Turaka</option>
-                            <option value="anonymous">Anonymous</option>
+                        <select id="post-is-anonymous">
+                        <option value="0" selected="">{{user_id.first_name}} {{user_id.last_name}}</option>
+                            <option value="1">Anonymous</option>
                         </select>
                         <label>Post as: </label>
                     </div>
                     <div class="col s3">
                          <label>Date: </label>
-                        <input type="text" class="datepicker">
+                        <input id="schedule-date" type="text" class="datepicker">
                     </div>
                     <div class="col s3">
                         <label>Time: </label>
-                        <input type="text" class="timepicker">
-                    </div>
+                        <input id=schedule-time type="text" class="timepicker">
+                    </div><br>
 
 
                 <div class="center-align vertical-align" style="margin: 10px;">
@@ -193,7 +296,7 @@
                     <button id="post-draft" type="button" class="btn waves-effect waves-light">Save as Draft<i class="material-icons right">drafts</i></button>
 
                      <!-- Button to schedule a post -->
-                    <button type="button" class="btn waves-effect waves-light">Schedule my Post<i class="material-icons right">schedule</i></button>
+                    <button  id="schedule-post" type="button" class="btn waves-effect waves-light">Schedule my Post<i class="material-icons right">schedule</i></button>
                 </div>
             </form>
         </div>
@@ -217,8 +320,15 @@
 
 <script type="text/javascript">
 
+
+    function create_comment(commentid){
+        return  '<div class="comment-block" data-commentid="'+commentid+'"> <div class="comment-dispaly" style="background:#F5E5C0;padding:25px;padding-left:15px;margin:10px;"> <div class="row"> <div class="col s10"> <div class="wrap comment-content"></div> </div> <div class="col s2"> <button class="edit-comment-button" class="button-background-remove" onclick="edit_comment('+commentid+')"><i class="material-icons small" style="color: green;">edit</i></button> <button class="delete-comment-button" class="button-background-remove" onclick="delete_comment('+commentid+')"><i class="material-icons small" style="color: red;">delete</i></button> </div> </div> <div style="float: right;clear:both;margin-right:20px;"> <a class="comment-posted_by" style="margin-right: 20px;">Name</a><span class="comment-time">Time</span> </div> </div> <div class="comment-edit" style="display: none"> <textarea class="froala-editor-editcomment" name="des"></textarea> <div class="center-align vertical-align" style="margin: 10px;"> <button class="save-edit-question" type="button" onclick="save_editcomment('+commentid+')" class="btn waves-effect waves-light">save<i class="material-icons right">send</i></button> <button class="cancel-edit-question" type="button" onclick="cancel_editcomment('+commentid+')" class="btn waves-effect waves-light">Cancel</button> </div> </div> </div>'
+    }
+
     // this function is called when a post in side bar is clicked or when url has a numeric postid
     function changeurl(post_id,push_url=true) {
+
+        cancel_editquestion();
 
         // ajax call to load required post along with its comments
         $.ajax({
@@ -233,21 +343,41 @@
 
             // displaying the block to show the question/post
             $("#new-question").css("display","none");
-            $("#existing-question").css("display","block");
+            $("#post-display-block").css("display","block");
 
             // Loading the question and its comments into content block
             var post_id = obj.id;
             var title=obj.title;
             var content=obj.content;
             var views=obj.views;
+            var posted_by=obj.posted_by.name;
+            var post_time=obj.time_stamp;
             $("#question-title").html(title);
             $("#question-content").html(content);
             $("#question-views").html("views: "+views);
+            // console.log(post_time);
+            console.log($("#question-posted_by").html());
+            $("#question-posted_by").html(posted_by);
+            $("#question-time").html(post_time);
+            if(obj.can_edit_delete==0){
+                $('#edit-post-button').css("display","none");
+                $('#delete-post-button').css("display","none");
+            }
             $("#post-comment").attr("data-content-postid",post_id);
+            $("#question-dispaly").attr("data-content-postid",post_id);
             $("#comments").html("");
             $.each(obj.comments, function () {
-                var comment = "<div class=wrap style=background-color:#F5E5C0;padding:5px;padding-left:15px;margin:10px;>"+this.content+"</div>";
+                var comment = create_comment(this.id);
                 $("#comments").append(comment);
+                var comment_block = $("#comments").find("[data-commentid='" + this.id + "']");
+                console.log(comment_block.attr("data-commentid"));
+                $(".comment-content", comment_block).html(this.content);
+                $(".comment-posted_by", comment_block).html(this.posted_by.name);
+                $(".comment-time", comment_block).html(this.time_stamp);
+                if(this.can_edit_delete==0){
+                $('.edit-comment-button').css("display","none");
+                $('.delete-comment-button').css("display","none");
+            }
              });
 
             //change the background color of the active post
@@ -263,9 +393,9 @@
             document.title = title;
             data_to_restore=document.body.innerHTML;
             if(push_url){
-                 window.history.pushState({data_to_restore},"", urlPath);
+                 window.history.pushState({title,data_to_restore},"", urlPath);
              }else{
-                window.history.replaceState({data_to_restore},"", urlPath);
+                window.history.replaceState({title,data_to_restore},"", urlPath);
              }
 
             // alert("Data: " + data + "\nStatus: " + status);
@@ -282,32 +412,40 @@
         });
     }
 
+
+
 // this function is called when newpost button is clicked
     function newpost_page(push_url=true){
-        $("#existing-question").css("display","none");
+
+        cancel_editquestion();
+
+        $("#post-display-block").css("display","none");
         $("#new-question").css("display","block");
 
          $('.post').removeClass('active-post');
 
         var urlPath="newpost";
         document.title = "New Post";
+        var title=document.title;
         data_to_restore=document.body.innerHTML;
         if(push_url){
-             window.history.pushState({data_to_restore},"", urlPath);
+             window.history.pushState({title,data_to_restore},"", urlPath);
          }else{
-            window.history.replaceState({data_to_restore},"", urlPath);
+            window.history.replaceState({title,data_to_restore},"", urlPath);
          }
         
     };
 
     // function called when the page is loaded and postid in url is non numeric
-    function redirect_to_home(){
-        
-        alert("The post you are looking for doesn't exist!");
+    function redirect_to_home(show_alert=true){
+        if(show_alert){
+            alert("The post you are looking for doesn't exist!");
+        }
         var urlPath="";
         document.title = "ForDis";
+        var title=document.title;
         data_to_restore=document.body.innerHTML;
-        window.history.replaceState({data_to_restore}, urlPath);
+        window.history.replaceState({title,data_to_restore}, urlPath);
         // window.location.href="../OzXE8C";
     }
 
@@ -318,9 +456,128 @@
             // console.log("Fired");
             console.log(e.state)
             document.body.innerHTML = e.state.data_to_restore;
-            document.title = e.state.pageTitle;
+            document.title = e.state.title;
         }
     };
+
+
+    function edit_question(){
+        console.log("called");
+        $("#question-dispaly").css("display","none");
+        var title= $('#question-title').html();
+        // console.log(title);
+        var des=$("#question-dispaly > #question-content").html();
+        $('#question-edit > #edit-title').val(title);
+        $('#question-edit > #froala-editor-editquestion').froalaEditor();
+        $('#question-edit > #froala-editor-editquestion').froalaEditor('html.set',des);
+        $('#question-edit').css("display","block");
+    }
+
+    function save_editquestion(){
+        // console.log($('question-dispaly').attr("data-content-postid"));
+         $.post("/class/edit_post",
+            {
+                post_id: $('#question-dispaly').attr("data-content-postid"),
+                title: $('#edit-title').val(),
+                content: $('#froala-editor-editquestion').froalaEditor('html.get'),
+                class_code: "{{class_code}}"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                    changeurl($('#question-dispaly').attr("data-content-postid"));
+                }
+            });   
+    }
+    function cancel_editquestion(){
+        $('#question-edit').css("display","none");
+        $("#question-dispaly").css("display","block");
+    }
+
+    function delete_question(){
+        if(confirm("Are you sure to delete the post?")){
+            $.post("/class/delete_post",
+            {
+                post_id: $('#question-dispaly').attr("data-content-postid"),
+                class_code: "{{class_code}}"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                    redirect_to_home(false);
+                }
+            });   
+        }
+        
+    }
+
+    function pin_question(){
+        if(confirm("Do you want to pin this post?")){
+            $.post("/class/pin_post",
+            {
+                post_id: $('#question-dispaly').attr("data-content-postid"),
+                class_code: "{{class_code}}"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                   location.reload();
+                }
+            });   
+        }
+        
+    }
+
+     function edit_comment(commentid){
+        var comment_block = $("#comments").find("[data-commentid='" + commentid + "']");
+        $(".comment-dispaly", comment_block).css("display","none");
+        var  content=$(".comment-content", comment_block).html();
+        console.log(content);
+        $(".froala-editor-editcomment", comment_block).froalaEditor();
+        $(".froala-editor-editcomment", comment_block).froalaEditor('html.set',content);
+        $(".comment-edit", comment_block).css("display","block");
+    }
+
+    function save_editcomment(commentid){
+        var comment_block = $("#comments").find("[data-commentid='" + commentid + "']");
+         $.post("/class/edit_comment",
+            {
+                post_id: $('#question-dispaly').attr("data-content-postid"),
+                comment_id: commentid,
+                content: $(".froala-editor-editcomment", comment_block).froalaEditor('html.get'),
+                class_code: "{{class_code}}"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                    changeurl($('#question-dispaly').attr("data-content-postid"));
+                }
+            });   
+    }
+    function cancel_editcomment(commentid){
+        var comment_block = $("#comments").find("[data-commentid='" + commentid + "']");
+        $(".comment-edit", comment_block).css("display","none");
+        $(".comment-dispaly", comment_block).css("display","block");
+    }
+
+    function delete_comment(commentid){
+        if(confirm("Are you sure to delete this comment?")){
+            $.post("/class/delete_comment",
+            {
+                post_id: $('#question-dispaly').attr("data-content-postid"),
+                comment_id: commentid,
+                class_code: "{{class_code}}"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                    location.reload();
+                }
+            });   
+        }
+        
+    }
+
 
     // loading the rich text editors on page load
     $(function() {
@@ -350,6 +607,9 @@
     });
 
 
+
+
+
     $( document ).ready(function(){
 
          // parsing the url on pageload and displaying the appropriate post in content block
@@ -365,8 +625,9 @@
         }else{
              var urlPath="";
             document.title = "ForDis";
+            var title=document.title;
             data_to_restore=document.body.innerHTML;
-            window.history.replaceState({data_to_restore}, urlPath);
+            window.history.replaceState({title,data_to_restore}, urlPath);
         }
 
         // function to post a new post
@@ -376,7 +637,8 @@
             {
                 title: $('#post-title').val(),
                 content: $('#froala-editor-newquestion').froalaEditor('html.get'),
-                class_code: "{{class_code}}"
+                class_code: "{{class_code}}",
+                is_anonymous:$('#post-is-anonymous').val()
             },
             function(data, status){
                 if(status == "success"){
@@ -387,6 +649,48 @@
             });   
         });
 
+         // function to post a new post
+        $("#post-draft").click(function(){
+            $("#post-draft").prop('disabled',true);
+            $.post("/class/new_post",
+            {
+                title: $('#post-title').val(),
+                content: $('#froala-editor-newquestion').froalaEditor('html.get'),
+                class_code: "{{class_code}}",
+                is_anonymous:$('#post-is-anonymous').val(),
+                is_draft:"1"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                    location.reload();
+                }
+                $("#post-draft").prop('disabled',false);
+            });   
+        });
+
+
+         // function to schedule post
+        $("#schedule-post").click(function(){
+            $("#schedule-post").prop('disabled',true);
+            $.post("/class/new_post",
+            {
+                title: $('#post-title').val(),
+                content: $('#froala-editor-newquestion').froalaEditor('html.get'),
+                date:$('#schedule-date').val(),
+                time:$('#schedule-time').val(),
+                class_code: "{{class_code}}",
+                is_anonymous:$('#post-is-anonymous').val()
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                    location.reload();
+                }
+                $("#schedule-post").prop('disabled',false);
+            });   
+        });
+
         // function to post a comment
         $("#post-comment").click(function(){
             $("#post-comment").prop('disabled',true);
@@ -394,7 +698,8 @@
             {
                 post_id: $('#post-comment').attr('data-content-postid'),
                 content: $('#froala-editor-comment').froalaEditor('html.get'),
-                class_code: "{{class_code}}"
+                class_code: "{{class_code}}",
+                is_anonymous:$('#comment-is-anonymous').val()
             },
             function(data, status){
                 if(status == "success"){
