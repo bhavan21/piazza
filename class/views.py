@@ -99,15 +99,31 @@ def classhome(request, class_code):
 						time_stamp__lt=timezone.now(),
 						class_id__class_code__exact=class_code
 					).order_by('-time_stamp')
-
+			polls = Poll.objects.filter(
+						time_stamp__lt= timezone.now(),
+						class_id__class_code__exact = class_code
+					).order_by('-time_stamp')
 			context = {
 				'posts': [],
+				'polls': [],
 				'error': '',
+				'all_tags' : [],
 				'class_code': class_code
 			}
+			all_topic = Topic.objects.filter(class_id__class_code__exact= class_code)
+			
+			
+			for i in all_topic:
+				context["all_tags"].append(i.name)
+
 			for i in posts:
 				temp = ViewRelation.objects.filter(user_id=user_id, post_id=i.id).count()
 
+				topic_post = TopicPostRelation.objects.filter(post_id = i.id)
+
+				tags = []
+				for j in topic_post:
+					tags.append(j.topic_id)
 				if temp > 0:
 					seen = True
 				else:
@@ -115,8 +131,10 @@ def classhome(request, class_code):
 
 				newobj = {
 					"post": i,
+					"tags" : tags ,
 					"seen": seen
 				}
+				# print(tags)
 				context["posts"].append(newobj)
 
 			return render(request, 'class/classhome.html', context)
@@ -137,11 +155,15 @@ def join_form(request):
 	pass_code = request.POST['codeout']
 	class_to_join = Class.objects.filter(class_code=class_code, class_password=pass_code)
 	if not class_to_join:
-		return HttpResponse("No Class Exists")
+		return HttpResponse("Failed")
+	class_ins_check = ClassInsRelation.objects.filter(class_id = class_to_join,ins_id= request.user)
+	if class_ins_check:
+		return HttpResponse("instructor");
 	var = Joins.objects.filter(class_id=class_to_join.first(), stud_id=request.user)
 	if not var:
 		Joins.objects.create(class_id=class_to_join.first(), stud_id=request.user, time_stamp=timezone.now())
-	return redirect('class:userhome')
+		return HttpResponse("success")
+	return HttpResponse("already")
 
 
 @csrf_exempt
@@ -158,7 +180,7 @@ def create_form(request):
 			break
 	some = Class.objects.create(course_name=class_name, course_code=course_code, year=year, semester=semester,class_code=class_code)
 	ClassInsRelation.objects.create(class_id=some, ins_id=request.user, time_stamp=timezone.now())
-	return redirect('class:userhome')
+	return HttpResponse("success")
 
 
 @csrf_exempt
@@ -171,8 +193,13 @@ def new_post(request):
 		content = request.POST['content']
 		class_object = Class.objects.get(class_code=class_code)
 		posted_by= User.objects.get(id=user_id)
-		
-		Post.objects.create(class_id=class_object,posted_by=posted_by,title=title,content=content,time_stamp=timezone.now())
+		tags_fetch = request.POST['tags_select']
+		tags_fetch = tags_fetch.split('&')
+		post_object = Post.objects.create(class_id=class_object,posted_by=posted_by,title=title,content=content,time_stamp=timezone.now())
+		for tag in tags_fetch:
+			id_name , tag = tag.split('=')
+			topic_post = Topic.objects.get(name = tag , class_id = class_object)
+			TopicPostRelation.objects.create(topic_id = topic_post , post_id = post_object)
 		return HttpResponse("success")
 	else:
 		return HttpResponse("Failed")
@@ -203,6 +230,12 @@ def get_post(request):
 							"name":post.posted_by.first_name+" "+post.posted_by.last_name}
 		data["views"]=post.views
 		data["comments"]=[]
+		data["tags"] = []
+
+		topic_post = TopicPostRelation.objects.filter(post_id = post)
+		for topic in topic_post:
+			topic_tag = topic.topic_id.name
+			data["tags"].append(topic_tag)
 		for i in comments:
 			comment={}
 			comment["content"] = i.content

@@ -87,12 +87,60 @@
     <!-- Side bar -->
     <div  id="sidebar">
 
+        <p>
+            for reference
+        {% for i in all_tags %}
+            {{i}} = 
+        {% endfor %}
+        </p>
+
+
         <!-- New post button -->
         <button id=newpost onclick="newpost_page()"><span style="font-size: 14px;display: inline-block;">New Post</span></button>
 
         <!-- Search bar -->
         <input id="search-box"  placeholder="Search..."  name="search"/>
         <a href="#"><i id="search-icon" class="small material-icons">search</i></a>
+
+
+ <div class="row">
+    <div class="col s12">
+      <ul class="tabs">
+        <li class="tab col s5"><a href="#poll_section">Polls</a></li>
+        <li class="tab col s5"><a href="#post_section">Posts</a></li>
+      </ul>
+    </div>
+    <div id="poll_section" class="col s12">
+
+
+
+        <ul class="collection" style="margin-top: 0px;">
+
+            {% for i in poll %}
+
+            <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
+                <b>{{i.poll.title}}</b><br>
+                
+<!-- 
+                { % for j in {{i.tags}} % }
+                    
+                    {{j.name}}
+
+                { % endfor %}  -->
+
+                <div class="wrap item">{{i.poll.content}}</div>
+            </li>
+            {% endfor %}
+        </ul>
+
+
+
+
+    </div>
+    
+    <div id="post_section" class="col s12">
+
+
 
         <!-- List of posts -->
         <ul class="collection" style="margin-top: 0px;">
@@ -110,10 +158,23 @@
             {% for i in posts %}
             <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
                 <b>{{i.post.title}}</b><br>
+                
+<!-- 
+                { % for j in {{i.tags}} % }
+                    
+                    {{j.name}}
+
+                { % endfor %}  -->
+
                 <div class="wrap item">{{i.post.content}}</div>
             </li>
             {% endfor %}
         </ul>
+    </div>
+  
+
+  </div>
+
 </div>
 
     <!-- Content -->
@@ -127,6 +188,10 @@
                 <div class="col s10">
                     <h3 id="question-title"></h3>
                 </div>
+                <div class="col s5" id = "tags">
+                    
+                </div>
+                
                 <div class="col s2">
                     <h3 id="question-views" class="chip"><h3>
                 </div>
@@ -150,13 +215,38 @@
 
         <!-- div to post a new post (display is initially none)-->
         <div id="new-question" style="display: none;">
-            <h5>Post a question</h5>
+            <h5>Post a question
+
+
+
+            </h5>
             <!-- This form is being submitted by Jquery -->
             <form id="new-question-form">
 
                 <!-- Title of the post-->
                 <h6>Summary:</h6>
                 <input type="text" id="post-title" name="title" style="padding-left: 10px; border:1px solid #000000" />
+
+
+
+                  <div class="input-field col s5">
+                    <select multiple id="tags_select" name = "tags_select">
+                      <option value="" disabled selected>Choose Tags</option>
+                      
+                      <!-- <option value="1">Option 1</option>
+                      <option value="2">Option 2</option>
+                      <option value="3">Option 3</option>
+                 -->
+
+        {% for i in all_tags %}
+             
+          <option value="{{i}}">{{i}}</option>
+                    
+        {% endfor %}
+
+                    </select>
+                    <label>Topic Tag</label>
+                  </div>
 
                 <!-- Content of the post-->
                 <h6>Details:</h6>
@@ -245,6 +335,15 @@
             $("#question-views").html("views: "+views);
             $("#post-comment").attr("data-content-postid",post_id);
             $("#comments").html("");
+            $('#tags').html("");
+
+            $.each(obj.tags,function()
+                { 
+                    var tag_chip = "<h3  class=\" black-text chip\">"+ this +" </h3>"
+
+                    $('#tags').append(tag_chip);
+
+                });
             $.each(obj.comments, function () {
                 var comment = "<div class=wrap style=background-color:#F5E5C0;padding:5px;padding-left:15px;margin:10px;>"+this.content+"</div>";
                 $("#comments").append(comment);
@@ -376,12 +475,13 @@
             {
                 title: $('#post-title').val(),
                 content: $('#froala-editor-newquestion').froalaEditor('html.get'),
-                class_code: "{{class_code}}"
+                class_code: "{{class_code}}" , 
+                tags_select : $('#tags_select').serialize()
             },
             function(data, status){
                 if(status == "success"){
-                    // alert(data+ "\nsuccess");
                     location.reload();
+                    // alert(data+ "\nsuccess");
                 }
                 $("#post-question").prop('disabled',false);
             });   
