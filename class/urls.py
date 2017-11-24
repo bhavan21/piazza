@@ -16,5 +16,12 @@ urlpatterns = [
 	url(r'^new_post$', views.new_post, name='new_post'),
 	url(r'^get_post$', views.get_post, name='get_post'),
 	url(r'^new_comment$', views.new_comment, name='new_comment'),
+	url(r'^delete_stud$', views.delete_stud_from_class, name='delete_stud_from_class'),
+	url(r'^change_class_activity$', views.change_class_activity, name='change_class_activity'),
+	url(r'^add_students_to_class$', views.add_students_to_class, name='add_students_to_class'),
+	url(r'^add_poll$', views.add_poll, name='add_poll'),
+	url(r'^update_account_password$', views.update_account_password, name='update_account_password'),
+	url(r'^add_tag$', views.add_tag, name='add_tag'),
+	url(r'^stud_drop_course$', views.stud_drop_course, name='stud_drop_course'),
 
 ]

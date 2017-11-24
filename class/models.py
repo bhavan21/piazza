@@ -78,11 +78,11 @@ class Poll(models.Model):
 
 
 class Option(models.Model):
-	poll_id = models.ForeignKey(Post, on_delete=models.CASCADE)
+	poll_id = models.ForeignKey(Poll, on_delete=models.CASCADE)
 	content = models.CharField(max_length=200)
 	count = models.IntegerField(default=0)
 
 
 class OptionStudRelation(models.Model):
-	option_id =  models.ForeignKey(Option, on_delete=models.CASCADE)
+	option_id = models.ForeignKey(Option, on_delete=models.CASCADE)
 	stud_id = models.ForeignKey(User, on_delete=models.CASCADE)
