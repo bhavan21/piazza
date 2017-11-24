@@ -104,26 +104,60 @@
     <!-- Side bar -->
     <div  id="sidebar">
 
+<!--         <p>
+            for reference
+        {% for i in all_tags %}
+            {{i}} = 
+        {% endfor %}
+        </p>
+ -->
+
+       
+
+
+ <div class="row">
+    <div class="col s12">
+      <ul class="tabs">
+        <li class="tab col s5"><a href="#post_section">Posts</a></li>
+        <li class="tab col s5"><a href="#poll_section">Polls</a></li>
+      </ul>
+    </div>
+    <div id="poll_section" class="col s12">
+
+
+
+        <ul class="collection" style="margin-top: 0px;">
+
+            {% for i in poll %}
+
+            <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
+                <b>{{i.poll.title}}</b><br>
+                
+<!-- 
+                { % for j in {{i.tags}} % }
+                    
+                    {{j.name}}
+
+                { % endfor %}  -->
+
+                <div class="wrap item">{{i.poll.content}}</div>
+            </li>
+            {% endfor %}
+        </ul>
+
+
+
+
+    </div>
+    
+    <div id="post_section" class="col s12">
+
         <!-- New post button -->
         <button id=newpost onclick="newpost_page()"><span style="font-size: 14px;display: inline-block;">New Post</span></button>
 
         <!-- Search bar -->
         <input id="search-box"  placeholder="Search..."  name="search"/>
         <a href="#"><i id="search-icon" class="small material-icons">search</i></a>
-
-        <!-- List of posts -->
-       
-           <!--   <li class="collection-item post unread-post active-post" onclick="changeurl({{i.post.id}})" style=>
-                <b >My Questiom</b><br>
-                <div class="wrap item">Content content content content</div>
-
-            </li>
-
-            <li class="collection-item post active-post" onclick="changeurl({{i.post.id}})" style="background: #f5e4bd">
-                <b style="">My Questiom</b><br>
-                <div class="wrap item" style="">Content content content content</div>
-
-            </li> -->
 
 
             <ul class="collapsible" data-collapsible="accordion">
@@ -168,11 +202,24 @@
             {% for i in posts %}
             <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
                 <b>{{i.post.title}}</b><br>
+                
+<!-- 
+                { % for j in {{i.tags}} % }
+                    
+                    {{j.name}}
+
+                { % endfor %}  -->
+
                 <div class="wrap item">{{i.post.content}}</div>
             </li>
             {% endfor %}
             </ul>
         </ul>
+    </div>
+  
+
+  </div>
+
 </div>
 
     <!-- Content -->
@@ -197,10 +244,15 @@
                     </div>
 
                 </div>
+                <div class="col s5" id = "tags">
+                    
+                </div>
                 <div id="question-content" class="wrap"></div><br>
                 <div style="float: right;clear:both;margin-right:20px;">
                     <a id="question-posted_by" style="margin-right: 20px;">Bhavan Turak</a><span id="question-time">25th July</span>
                 </div>
+                
+                
             </div>
 
             <div id="question-edit"  style="display: none">
@@ -253,13 +305,38 @@
 
         <!-- div to post a new post (display is initially none)-->
         <div id="new-question" style="display: none;">
-            <h5>Post a question</h5>
+            <h5>Post a question
+
+
+
+            </h5>
             <!-- This form is being submitted by Jquery -->
             <form id="new-question-form">
 
                 <!-- Title of the post-->
                 <h6>Summary:</h6>
                 <input type="text" id="post-title" name="title" style="padding-left: 10px; border:1px solid #000000" />
+
+
+
+                  <div class="input-field col s5">
+                    <select multiple id="tags_select" name = "tags_select">
+                      <option value="" disabled selected>Choose Tags</option>
+                      
+                      <!-- <option value="1">Option 1</option>
+                      <option value="2">Option 2</option>
+                      <option value="3">Option 3</option>
+                 -->
+
+        {% for i in all_tags %}
+             
+          <option value="{{i}}">{{i}}</option>
+                    
+        {% endfor %}
+
+                    </select>
+                    <label>Topic Tag</label>
+                  </div>
 
                 <!-- Content of the post-->
                 <h6>Details:</h6>
@@ -366,6 +443,16 @@
             $("#post-comment").attr("data-content-postid",post_id);
             $("#question-dispaly").attr("data-content-postid",post_id);
             $("#comments").html("");
+            $('#tags').html("");
+
+            console.log(obj.tags);
+            $.each(obj.tags,function()
+                { 
+                    var tag_chip = "<h3  class=\" black-text chip\">"+ this +" </h3>"
+
+                    $('#tags').append(tag_chip);
+
+                });
             $.each(obj.comments, function () {
                 var comment = create_comment(this.id);
                 $("#comments").append(comment);
@@ -418,6 +505,7 @@
     function newpost_page(push_url=true){
 
         cancel_editquestion();
+        console.log("called");
 
         $("#post-display-block").css("display","none");
         $("#new-question").css("display","block");
@@ -637,13 +725,16 @@
             {
                 title: $('#post-title').val(),
                 content: $('#froala-editor-newquestion').froalaEditor('html.get'),
+
                 class_code: "{{class_code}}",
-                is_anonymous:$('#post-is-anonymous').val()
+                is_anonymous:$('#post-is-anonymous').val(),
+                tags_select : $('#tags_select').serialize()
+
             },
             function(data, status){
                 if(status == "success"){
-                    // alert(data+ "\nsuccess");
                     location.reload();
+                    // alert(data+ "\nsuccess");
                 }
                 $("#post-question").prop('disabled',false);
             });   

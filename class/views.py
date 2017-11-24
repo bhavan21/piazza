@@ -100,17 +100,35 @@ def classhome(request, class_code):
 						class_id__class_code__exact=class_code
 					).order_by('-time_stamp')
 			user_object=User.objects.get(id=user_id)
+			polls = Poll.objects.filter(
+						time_stamp__lt= timezone.now(),
+						class_id__class_code__exact = class_code
+					).order_by('-time_stamp')
 
 			context = {
 				'posts': [],
+				'polls': [],
 				'pins': [],
 				'drafts': [],
 				'error': '',
+				'all_tags' : [],
 				'class_code': class_code,
-				'user_id':user_object
+				'user_id':user_object			
 			}
+			all_topic = Topic.objects.filter(class_id__class_code__exact= class_code)
+			
+			
+			for i in all_topic:
+				context["all_tags"].append(i.name)
+
 			for i in posts:
 				temp = ViewRelation.objects.filter(user_id=user_id, post_id=i.id).count()
+
+				topic_post = TopicPostRelation.objects.filter(post_id = i.id)
+
+				tags = []
+				for j in topic_post:
+					tags.append(j.topic_id)
 
 				if temp > 0:
 					seen = True
@@ -125,14 +143,19 @@ def classhome(request, class_code):
 
 				newobj = {
 					"post": i,
+					"tags" : tags ,
 					"seen": seen
 				}
+
 				if i.is_draft==0:
 					context["posts"].append(newobj)
 					if pinned:
 						context["pins"].append(newobj)
 				if i.is_draft==1 and i.posted_by.id==user_id:
 					context["drafts"].append(newobj)
+
+				
+
 
 			return render(request, 'class/classhome.html', context)
 		else:
@@ -152,11 +175,15 @@ def join_form(request):
 	pass_code = request.POST['codeout']
 	class_to_join = Class.objects.filter(class_code=class_code, class_password=pass_code)
 	if not class_to_join:
-		return HttpResponse("No Class Exists")
+		return HttpResponse("Failed")
+	class_ins_check = ClassInsRelation.objects.filter(class_id = class_to_join,ins_id= request.user)
+	if class_ins_check:
+		return HttpResponse("instructor");
 	var = Joins.objects.filter(class_id=class_to_join.first(), stud_id=request.user)
 	if not var:
 		Joins.objects.create(class_id=class_to_join.first(), stud_id=request.user, time_stamp=timezone.now())
-	return redirect('class:userhome')
+		return HttpResponse("success")
+	return HttpResponse("already")
 
 
 @csrf_exempt
@@ -173,7 +200,7 @@ def create_form(request):
 			break
 	some = Class.objects.create(course_name=class_name, course_code=course_code, year=year, semester=semester,class_code=class_code)
 	ClassInsRelation.objects.create(class_id=some, ins_id=request.user, time_stamp=timezone.now())
-	return redirect('class:userhome')
+	return HttpResponse("success")
 
 
 @csrf_exempt
@@ -201,8 +228,15 @@ def new_post(request):
 		else:
 			is_draft=False
 
-		Post.objects.create(class_id=class_object,posted_by=posted_by,title=title,content=content,time_stamp=time_stamp,is_anonymous=is_anonymous,is_draft=is_draft)
-		return HttpResponse(str(time_stamp))
+		
+		tags_fetch = request.POST['tags_select']
+		tags_fetch = tags_fetch.split('&')
+		post_object = Post.objects.create(class_id=class_object,posted_by=posted_by,title=title,content=content,time_stamp=time_stamp,is_anonymous=is_anonymous,is_draft=is_draft)
+		for tag in tags_fetch:
+			id_name , tag = tag.split('=')
+			topic_post = Topic.objects.get(name = tag , class_id = class_object)
+			TopicPostRelation.objects.create(topic_id = topic_post , post_id = post_object)
+		return HttpResponse("success")
 	else:
 		return HttpResponse("Failed")
 
@@ -271,6 +305,7 @@ def edit_post(request):
 @csrf_exempt
 @login_required(login_url=loginURL)
 def get_post(request):
+	print("akh")
 	user_id = request.session.get("id")
 	class_code = request.GET['class_code']
 	post_id = request.GET['post_id']
@@ -298,8 +333,8 @@ def get_post(request):
 		data["views"]=post.views
 		data["time_stamp"]=post.time_stamp.strftime("%b %d, %I:%M %p")
 		is_ins = ClassInsRelation.objects.filter(
-		class_id__class_code__exact=class_code,
-		ins_id__id__exact=user_id
+			class_id__class_code__exact=class_code,
+			ins_id__id__exact=user_id
 		)
 		if is_ins or post.posted_by.id==user_id:
 			data["can_edit_delete"]=1;
@@ -307,6 +342,15 @@ def get_post(request):
 			data["can_edit_delete"]=0;
 
 		data["comments"]=[]
+		data["tags"] = []
+
+		topic_post = TopicPostRelation.objects.filter(post_id = post)
+		print(post.id)
+		for topic in topic_post:
+			topic_tag = topic.topic_id.name
+			data["tags"].append(topic_tag)
+			print(topic_tag)
+			print("akh")
 		for i in comments:
 			comment={}
 			comment["id"]=i.id
