@@ -1,6 +1,4 @@
-from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect
-from django.urls import reverse
-from django.template import loader
+from django.shortcuts import render, redirect, HttpResponse
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -100,25 +98,63 @@ def classhome(request, class_code):
 						time_stamp__lt=timezone.now(),
 						class_id__class_code__exact=class_code
 					).order_by('-time_stamp')
+			user_object=User.objects.get(id=user_id)
+			polls = Poll.objects.filter(
+						time_stamp__lt= timezone.now(),
+						class_id__class_code__exact = class_code
+					).order_by('-time_stamp')
 
 			context = {
 				'posts': [],
+				'polls': [],
+				'pins': [],
+				'drafts': [],
 				'error': '',
-				'class_code': class_code
+				'all_tags' : [],
+				'class_code': class_code,
+				'user_id':user_object			
 			}
+			all_topic = Topic.objects.filter(class_id__class_code__exact= class_code)
+			
+			
+			for i in all_topic:
+				context["all_tags"].append(i.name)
+
 			for i in posts:
 				temp = ViewRelation.objects.filter(user_id=user_id, post_id=i.id).count()
+
+				topic_post = TopicPostRelation.objects.filter(post_id = i.id)
+
+				tags = []
+				for j in topic_post:
+					tags.append(j.topic_id)
 
 				if temp > 0:
 					seen = True
 				else:
 					seen = False
 
+				temp = PinRelation.objects.filter(user_id=user_id, post_id=i.id).count()
+				if temp > 0:
+					pinned = True
+				else:
+					pinned = False
+
 				newobj = {
 					"post": i,
+					"tags" : tags ,
 					"seen": seen
 				}
-				context["posts"].append(newobj)
+
+				if i.is_draft==0:
+					context["posts"].append(newobj)
+					if pinned:
+						context["pins"].append(newobj)
+				if i.is_draft==1 and i.posted_by.id==user_id:
+					context["drafts"].append(newobj)
+
+				
+
 
 			return render(request, 'class/classhome.html', context)
 		else:
@@ -126,7 +162,7 @@ def classhome(request, class_code):
 				'posts': [],
 				'error': 'This class is not taken by you'
 			}
-			return render(request, 'class/classhome.html', context)
+			return render(request, 'class/', context)
 	else:
 		return redirect(('class:login_'))
 
@@ -138,11 +174,15 @@ def join_form(request):
 	pass_code = request.POST['codeout']
 	class_to_join = Class.objects.filter(class_code=class_code, class_password=pass_code)
 	if not class_to_join:
-		return HttpResponse("No Class Exists")
+		return HttpResponse("Failed")
+	class_ins_check = ClassInsRelation.objects.filter(class_id = class_to_join,ins_id= request.user)
+	if class_ins_check:
+		return HttpResponse("instructor");
 	var = Joins.objects.filter(class_id=class_to_join.first(), stud_id=request.user)
 	if not var:
 		Joins.objects.create(class_id=class_to_join.first(), stud_id=request.user, time_stamp=timezone.now())
-	return redirect('class:userhome')
+		return HttpResponse("success")
+	return HttpResponse("already")
 
 
 @csrf_exempt
@@ -159,7 +199,7 @@ def create_form(request):
 			break
 	some = Class.objects.create(course_name=class_name, course_code=course_code, year=year, semester=semester,class_code=class_code)
 	ClassInsRelation.objects.create(class_id=some, ins_id=request.user, time_stamp=timezone.now())
-	return redirect('class:userhome')
+	return HttpResponse("success")
 
 
 @csrf_exempt
@@ -172,8 +212,93 @@ def new_post(request):
 		content = request.POST['content']
 		class_object = Class.objects.get(class_code=class_code)
 		posted_by= User.objects.get(id=user_id)
+
+		if request.POST.get('data') and request.POST.get('time'):
+			time_stamp=datetime.strptime(request.POST['date']+request.POST['time'], '%d %B, %Y%I:%M%p')
+		else:
+			time_stamp=timezone.now()
+		if request.POST["is_anonymous"]=="1":
+			is_anonymous=True
+		else:
+			is_anonymous=False
+
+		if request.POST.get("is_draft"):
+			is_draft=True
+		else:
+			is_draft=False
+
 		
-		Post.objects.create(class_id=class_object,posted_by=posted_by,title=title,content=content,time_stamp=timezone.now())
+		tags_fetch = request.POST['tags_select']
+		tags_fetch = tags_fetch.split('&')
+		post_object = Post.objects.create(class_id=class_object,posted_by=posted_by,title=title,content=content,time_stamp=time_stamp,is_anonymous=is_anonymous,is_draft=is_draft)
+		for tag in tags_fetch:
+			id_name , tag = tag.split('=')
+			topic_post = Topic.objects.get(name = tag , class_id = class_object)
+			TopicPostRelation.objects.create(topic_id = topic_post , post_id = post_object)
+		return HttpResponse("success")
+	else:
+		return HttpResponse("Failed")
+
+
+@csrf_exempt
+@login_required(login_url=loginURL)
+def delete_post(request):
+	user_id = request.session.get("id")
+	class_code = request.POST['class_code']
+	post_id = request.POST['post_id']
+	post= Post.objects.get(id=post_id)
+
+	is_ins = ClassInsRelation.objects.filter(
+		class_id__class_code__exact=class_code,
+		ins_id__id__exact=user_id
+	)
+	is_stud_and_has_access = Post.objects.filter(id=post_id,posted_by__id__exact=user_id);
+
+	if is_ins or is_stud_and_has_access :
+		post.delete()
+		return HttpResponse("success")
+	else:
+		return HttpResponse("Failed")
+
+
+@csrf_exempt
+@login_required(login_url=loginURL)
+def pin_post(request):
+	user_id = request.session.get("id")
+	class_code = request.POST['class_code']
+	post_id = request.POST['post_id']
+	post= Post.objects.get(id=post_id)
+
+	if is_class_taken(user_id,class_code):
+		is_already_pinned=PinRelation.objects.filter(user_id=user_id, post_id=post_id)
+		if not is_already_pinned:
+			user_object=User.objects.get(id=user_id)
+			PinRelation.objects.create(user_id=user_object,post_id=post)
+		return HttpResponse("success")
+	else:
+		return HttpResponse("Failed")
+
+
+@csrf_exempt
+@login_required(login_url=loginURL)
+def edit_post(request):
+	user_id = request.session.get("id")
+	class_code = request.POST['class_code']
+	post_id = request.POST['post_id']
+	post= Post.objects.get(id=post_id)
+
+	is_ins = ClassInsRelation.objects.filter(
+		class_id__class_code__exact=class_code,
+		ins_id__id__exact=user_id
+	)
+	is_stud_and_has_access = Post.objects.filter(id=post_id,posted_by__id__exact=user_id);
+
+	if is_ins or is_stud_and_has_access :
+		title = request.POST['title']
+		content = request.POST['content']
+		post.title=title
+		post.content=content
+		post.save()
 		return HttpResponse("success")
 	else:
 		return HttpResponse("Failed")
@@ -182,6 +307,7 @@ def new_post(request):
 @csrf_exempt
 @login_required(login_url=loginURL)
 def get_post(request):
+	print("akh")
 	user_id = request.session.get("id")
 	class_code = request.GET['class_code']
 	post_id = request.GET['post_id']
@@ -201,15 +327,46 @@ def get_post(request):
 		data["id"]=post.id
 		data["title"]=post.title
 		data["content"]=post.content
-		data["posted_by"]={"id":post.posted_by.id, 
+		if post.is_anonymous:
+			data["posted_by"]={"name":"Anonymous User"}
+		else:
+			data["posted_by"]={"id":post.posted_by.id, 
 							"name":post.posted_by.first_name+" "+post.posted_by.last_name}
 		data["views"]=post.views
+		data["time_stamp"]=post.time_stamp.strftime("%b %d, %I:%M %p")
+		is_ins = ClassInsRelation.objects.filter(
+			class_id__class_code__exact=class_code,
+			ins_id__id__exact=user_id
+		)
+		if is_ins or post.posted_by.id==user_id:
+			data["can_edit_delete"]=1;
+		else:
+			data["can_edit_delete"]=0;
+
 		data["comments"]=[]
+		data["tags"] = []
+
+		topic_post = TopicPostRelation.objects.filter(post_id = post)
+		print(post.id)
+		for topic in topic_post:
+			topic_tag = topic.topic_id.name
+			data["tags"].append(topic_tag)
+			print(topic_tag)
+			print("akh")
 		for i in comments:
 			comment={}
+			comment["id"]=i.id
 			comment["content"] = i.content
-			comment["posted_by"] = {"id":post.posted_by.id, 
-							"name":post.posted_by.first_name+" "+post.posted_by.last_name}
+			if i.is_anonymous:
+				comment["posted_by"]={"name":"Anonymous User"}
+			else:
+				comment["posted_by"] = {"id":i.posted_by.id, 
+							"name":i.posted_by.first_name+" "+i.posted_by.last_name}
+			comment["time_stamp"]=i.time_stamp.strftime("%b %d, %I:%M %p")
+			if is_ins or i.posted_by.id==user_id:
+				comment["can_edit_delete"]=1;
+			else:
+				comment["can_edit_delete"]=0;
 			data["comments"].append(comment)
 		return HttpResponse(json.dumps(data))
 	else:
@@ -227,7 +384,56 @@ def new_comment(request):
 		content = request.POST['content']
 		posted_by= User.objects.get(id=user_id)
 		post = Post.objects.get(id=post_id)
-		Comment.objects.create(post_id=post, posted_by=posted_by,content=content, time_stamp=timezone.now())
+		if request.POST["is_anonymous"]=="1":
+			is_anonymous=True
+		else:
+			is_anonymous=False
+		Comment.objects.create(post_id=post, posted_by=posted_by,content=content,time_stamp=timezone.now(),is_anonymous=is_anonymous )
+		return HttpResponse("success")
+	else:
+		return HttpResponse("Failed")
+
+
+@csrf_exempt
+@login_required(login_url=loginURL)
+def edit_comment(request):
+	user_id = request.session.get("id")
+	class_code = request.POST['class_code']
+	comment_id = request.POST['comment_id']
+	comment= Comment.objects.get(id=comment_id)
+
+	is_ins = ClassInsRelation.objects.filter(
+		class_id__class_code__exact=class_code,
+		ins_id__id__exact=user_id
+	)
+	is_stud_and_has_access = Comment.objects.filter(id=comment_id,posted_by__id__exact=user_id);
+
+	if is_ins or is_stud_and_has_access :
+		content = request.POST['content']
+		comment.content=content
+		comment.save()
+		return HttpResponse("success")
+	else:
+		return HttpResponse("Failed")
+
+
+@csrf_exempt
+@login_required(login_url=loginURL)
+def delete_comment(request):
+	user_id = request.session.get("id")
+	class_code = request.POST['class_code']
+	comment_id = request.POST['comment_id']
+	comment= Comment.objects.get(id=comment_id)
+
+	is_ins = ClassInsRelation.objects.filter(
+		class_id__class_code__exact=class_code,
+		ins_id__id__exact=user_id
+	)
+
+	is_stud_and_has_access = Comment.objects.filter(id=comment_id,posted_by__id__exact=user_id);
+
+	if is_ins or is_stud_and_has_access :
+		comment.delete()
 		return HttpResponse("success")
 	else:
 		return HttpResponse("Failed")
@@ -340,7 +546,8 @@ def add_students_to_class(request):
 					able_to_add.append(line[0])
 				else:
 					unable_to_add.append(line[0])
-			return HttpResponse(json.dumps({"status": "200", "able_to_add": able_to_add, "unable_to_add": unable_to_add}))
+			# return HttpResponse(json.dumps({"status": "200", "able_to_add": able_to_add, "unable_to_add": unable_to_add}))
+			return redirect('/class/' + class_code + '/settings')
 		else:
 			stud_email = request.POST['stud_email']
 			is_student_in_class = Joins.objects.filter(stud_id__email__exact=stud_email, class_id__class_code__exact=class_code)
@@ -350,7 +557,8 @@ def add_students_to_class(request):
 				joins.stud_id = User.objects.filter(email__exact=stud_email)[0]
 				joins.time_stamp = timezone.now()
 				joins.save()
-				return HttpResponse(json.dumps({"status": "200"}))
+				print("student added!")
+				return redirect('/class/'+class_code+'/settings')
 			else:
 				return HttpResponse(json.dumps({"status": "404"}))
 	return HttpResponse(json.dumps({"status": "404", "class_code": class_code, "user_id": user_id}))
@@ -408,7 +616,7 @@ def add_poll(request):
 					"title": title,
 					"poll_options": poll_options,
 					"is_multi": is_multi,
-					"time": str(poll_deadline)[:-16]
+					"time": str(poll_deadline)[:-6]
 				}
 			)
 		)

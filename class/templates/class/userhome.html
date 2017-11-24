@@ -15,7 +15,54 @@
 			$('#modal_create').modal();
 			$('#select_semester').material_select();
 			$( "#datepicker" ).material_select();
+			$('#join_button').click(function(){
+				// alert("desp");
+				
+				$.ajax({
+				    url: 'join_form',
+				    type: 'post',
+					data: $('#join_form').serialize(),
+					success: function(data) {
+
+						if(data == "Failed")
+				          Materialize.toast("Invalid Class Credentials", 4000);
+				        if(data == "instructor")
+				        	Materialize.toast("You're Instructor For it. Can't Do",4000);
+				        if(data == "already")
+				        	Materialize.toast("Already Enrolled",4000);
+				        if(data == "success")
+				        {
+				        	Materialize.toast("Success",4000);
+				        	location.reload();
+				        }
+
+
+				         }
+				});
+
+			});
+
+			$('#create_button').click(function(){
+
+				$.ajax({
+				    url: 'create_form',
+				    type: 'post',
+					data: $('#create_form').serialize(),
+					success: function(data) {
+
+				        if(data == "success")
+				        {
+				        	Materialize.toast("Success",4000);
+				        	Materialize.toast("Please Set Passcode ",50000);
+				        	setTimeout(location.reload.bind(location), 10000);
+				        }
+				         }
+				});
+
+			});
+
 		});
+
 	</script>
 </head>
 <body>
@@ -66,7 +113,7 @@
 
 			<div class="row">
 				<h4 class="center-align">Join a class</h4>
-				<form class="col s12" method="post" action="join_form">
+				<form class="col s12" id="join_form">
 					<!-- {% csrf_token %} -->
 					<div class="row">
 						<div class="input-field col s6">
@@ -80,12 +127,13 @@
 							<label >Passcode</label>
 						</div>
 					</div>
+				</form>
+
 					<div class="center-align vertical-align">
-						<button class="modal-action modal-close btn waves-effect waves-light" type="submit" name="action">Join
+						<button class="modal-action modal-close btn waves-effect waves-light" id="join_button" >Join
 							<i class="material-icons right">send</i>
 						</button>
 					</div>
-				</form>
 			</div>
 		</div>
 	</div>
@@ -97,7 +145,7 @@
 
 			<div class="row">
 				<h4 class="center-align">Create a class</h4>
-				<form class="col s12" method="post" action="create_form">
+				<form class="col s12" id="create_form">
 					<!-- {% csrf_token %} -->
 					<div class="row">
 						<div class="input-field col s6">
@@ -125,10 +173,10 @@
 							<select id="datepicker" name="year">
 								<option value="" disabled selected>Choose Year</option>
 								<option value="2017">2017</option>
-								<option value="2015">2018</option>
-								<option value="2016">2019</option>
-								<option value="2018">2020</option>
-								<option value="2019">2021</option>
+								<option value="2018">2018</option>
+								<option value="2019">2019</option>
+								<option value="2020">2020</option>
+								<option value="2021">2021</option>
 							</select>
 							<label>Year</label>
 						</div>	   
@@ -137,13 +185,13 @@
 				<!-- <div class="center-align vertical-align">
 					<input type="submit" class="modal-action  green modal-close waves-effect waves-yellow btn-flat" value="Create" >
 				</div> -->
+				</form>
 					<div class="center-align vertical-align">
-						<button class="modal-action modal-close btn waves-effect waves-light" type="submit" name="action">Create
+						<button class="modal-action modal-close btn waves-effect waves-light" id="create_button">Create
 							<i class="material-icons right">send</i>
 						</button>
 					</div>
 
-				</form>
 			</div>
 		</div>
 	</div>
@@ -159,13 +207,16 @@
 				<div class="card-content white-text">
 					<span class="card-title">{{akh.class_id.course_code}}</span>
 					<p>
-						{{akh.class_id.course_name}}
+						{{akh.class_id.course_name}} 
+						<br> {{akh.class_id.semester}} , {{akh.class_id.year}}
 					</p>
 				</div>
 			</a>
 
 			<div class="card-action">
-				<span class = "black-text" >{{akh.class_id.semester}} , {{akh.class_id.year}} </span>
+				<span class="black-text">
+					{{akh.class_id.class_code}} 
+				</span>				
 				<a href="{{akh.class_id.class_code}}/settings" style="float: right;">Settings</a>
 			</div>
 		</div>
@@ -200,6 +251,7 @@
 			<div class="card-action">
 				<span class = "black-text" >{{akh.class_id.semester}} , {{akh.class_id.year}} </span>
 				<a href="javascript:dropCourse('{{ akh.class_id.class_code }}')" style="float: right; " >Drop Course</a>
+
 			</div>
 		</div>
 	</div>

@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 from django.contrib.auth.models import User
 
 
@@ -40,6 +39,7 @@ class Post(models.Model):
 	title = models.CharField(max_length=50)
 	content = models.TextField()
 	is_draft = models.BooleanField(default=True)
+	is_anonymous=models.BooleanField(default=False)
 	views = models.IntegerField(default=0)
 	sched_time = models.DateTimeField(null=True)
 	time_stamp = models.DateTimeField()
@@ -65,6 +65,7 @@ class Comment(models.Model):
 	posted_by = models.ForeignKey(User, on_delete=models.CASCADE)
 	content = models.TextField()
 	time_stamp = models.DateTimeField()
+	is_anonymous=models.BooleanField(default=False)
 
 
 class Poll(models.Model):
