@@ -183,7 +183,7 @@
                         <span>
                             <ul class="collection" style="margin-top: 0px;">
                             {% for i in drafts %}
-                            <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="loaddraft({{i.post.id}})" data-postid={{i.post.id}} >
+                            <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}} >
                                 <h6 >{{i.post.title}}</h6><br>
                                 <!-- <div class="wrap item">{{i.post.content}}</div> -->
                             </li>

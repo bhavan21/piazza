@@ -250,7 +250,7 @@ def new_post(request):
 				topic_post = Topic.objects.get(name = tag , class_id = class_object)
 				TopicPostRelation.objects.create(topic_id = topic_post , post_id = post_object)
 		ViewRelation.objects.create(user_id=posted_by,post_id=post_object)
-		post_object.views=post.views+1
+		post_object.views=post_object.views+1
 		post_object.save()
 
 		return HttpResponse("success")
