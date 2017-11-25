@@ -546,8 +546,8 @@ def add_students_to_class(request):
 					able_to_add.append(line[0])
 				else:
 					unable_to_add.append(line[0])
-			# return HttpResponse(json.dumps({"status": "200", "able_to_add": able_to_add, "unable_to_add": unable_to_add}))
-			return redirect('/class/' + class_code + '/settings')
+			return HttpResponse(json.dumps({"status": "200", "able_to_add": able_to_add, "unable_to_add": unable_to_add}))
+			# return redirect('/class/' + class_code + '/settings')
 		else:
 			stud_email = request.POST['stud_email']
 			is_student_in_class = Joins.objects.filter(stud_id__email__exact=stud_email, class_id__class_code__exact=class_code)
@@ -558,10 +558,14 @@ def add_students_to_class(request):
 				joins.time_stamp = timezone.now()
 				joins.save()
 				print("student added!")
-				return redirect('/class/'+class_code+'/settings')
+				# return redirect('/class/'+class_code+'/settings')
+				return HttpResponse(json.dumps({"status": "200", "message": "Student with id : "+stud_email+" added into class!"}))
 			else:
-				return HttpResponse(json.dumps({"status": "404"}))
-	return HttpResponse(json.dumps({"status": "404", "class_code": class_code, "user_id": user_id}))
+				return HttpResponse(json.dumps({
+					"status": "404",
+					"message": "You can't add this user. He is instructor or he is already in class"
+				}))
+	return HttpResponse(json.dumps({"status": "404", "message": "You can't access this page!"}))
 
 
 @csrf_exempt

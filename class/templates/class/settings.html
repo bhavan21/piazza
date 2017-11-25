@@ -69,7 +69,7 @@
                 <li class="tab col s3"><a class="active" href="#test-swipe-2-add-2">Upload students csv</a></li>
             </ul>
           <div id="test-swipe-add-1" class="col s12">
-              <form action="{% url 'class:add_students_to_class' %}" method="post" enctype="multipart/form-data" class="col s6">
+              <form action="{% url 'class:add_students_to_class' %}" method="post" enctype="multipart/form-data" class="col s6" id="no_csv_stud_add">
                   <input hidden name="is_csv" value="0">
                   <input hidden name="class_code" value={{ class_code }}>
                   <div class="input-field col s12">
@@ -82,7 +82,7 @@
           </div>
           <div id="test-swipe-2-add-2" class="col s12">
               <p></p>
-              <form action="{% url 'class:add_students_to_class' %}" method="post" enctype="multipart/form-data" class="col s6">
+              <form action="{% url 'class:add_students_to_class' %}" method="post" enctype="multipart/form-data" class="col s6" id="csv_stud_add">
                   <input hidden name="is_csv" value="1">
                   <input hidden name="class_code" value={{ class_code }}>
                   <div class="row">
@@ -387,6 +387,102 @@
                 }
             }
         )
+    });
+
+	$("#no_csv_stud_add").submit(function (event){
+	    event.preventDefault();
+	    var $form = $( this ),
+            url = $form.attr( 'action' );
+	    $.post(url,
+            $("#no_csv_stud_add").serialize(),
+            function (data, status) {
+                if(status == "success"){
+                    data = JSON.parse(data);
+                    if(data['status'] == "200"){
+                        Materialize.toast(data['message'],3000);
+                        setTimeout(location.reload.bind(location), 3500);
+                    }else{
+                        Materialize.toast(data['message'],3000);
+                    }
+                }else{
+                    alert("Network Error! Try again!");
+                }
+            }
+        );
+    });
+
+	$("form#csv_stud_add").submit(function (event){
+	    event.preventDefault();
+	    var $form = $( this ),
+            url = $form.attr( 'action' );
+	    var formData = new FormData(this);
+	    $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                mimeType: "multipart/form-data",
+                contentType: false,
+                cache: false,
+                processData: false,
+                async: false,
+                success: function (data) {
+                    data = JSON.parse(data);
+                    console.log(data);
+                    if(data['status'] == "200"){
+                        var $toastContent = $('<span></span>');
+                        if(data['unable_to_add'].length == 0){
+                            Materialize.toast('All the students in csv file are added',2000);
+                            setTimeout(location.reload.bind(location), 2500);
+                        }else if(data['able_to_add'].length == 0){
+                            Materialize.toast('None of the students in csv file are added',2000);
+                            setTimeout(location.reload.bind(location), 2500);
+                        }else{
+                            var htmlAbleToAdd = "<div class=\"row\" style=\"font-size:30px\">Students Added :</div><br>";
+                            for(var temp = 0; temp < data['able_to_add'].length; temp++){
+                                htmlAbleToAdd = htmlAbleToAdd + "<br>"+data['able_to_add'][temp];
+                            }
+                            Materialize.toast(htmlAbleToAdd,data['able_to_add'].length*2000);
+                            htmlAbleToAdd = "<div class=\"row\" style=\"font-size:30px\">Students Not Added</div><br>";
+                            for(var temp = 0; temp < data['unable_to_add'].length; temp++){
+                                htmlAbleToAdd = htmlAbleToAdd + "<br>"+data['unable_to_add'][temp];
+                            }
+                            Materialize.toast(htmlAbleToAdd,data['unable_to_add'].length*2000+data['able_to_add'].length*2000);
+                            setTimeout(location.reload.bind(location), data['unable_to_add'].length*2000+data['able_to_add'].length*2000+500);
+                        }
+                    }else{
+                        Materialize.toast("Error While adding!",3000);
+                    }
+                },
+                error: function (data) {
+                    alert("Network Error! Try again!");
+                }
+            });
+{#	    $.post(url,#}
+{#            formData,#}
+{#            function (data, status) {#}
+{#                if(status == "success"){#}
+{#                    data = JSON.parse(data);#}
+{#                    if(data['status'] == "200"){#}
+{#                        var $toastContent = $('<span></span>');#}
+{#                        var htmlAbleToAdd = "<div class=\"row\" style=\"font-size:30px\">Students Added</div>";#}
+{#                        for(var temp = 0; temp < data['able_to_add'].length; temp++){#}
+{#                            htmlAbleToAdd = htmlAbleToAdd + "<div class=\"row\">"+data['able_to_add'][temp]+"</div>";#}
+{#                        }#}
+{#                        htmlAbleToAdd = htmlAbleToAdd +"<div class=\"row\" style=\"font-size:30px\">Students Not Added</div>";#}
+{#                        for(var temp = 0; temp < data['unable_to_add'].length; temp++){#}
+{#                            htmlAbleToAdd = htmlAbleToAdd + "<div class=\"row\">"+data['unable_to_add'][temp]+"</div>";#}
+{#                        }#}
+{#                        $toastContent.innerHTML = htmlAbleToAdd;#}
+{#                        Materialize.toast($toastContent,10000);#}
+{#                        setTimeout(location.reload.bind(location), 11000);#}
+{#                    }else{#}
+{#                        Materialize.toast("Error While adding!",3000);#}
+{#                    }#}
+{#                }else{#}
+{#                    alert("Network Error! Try again!");#}
+{#                }#}
+{#            }#}
+{#        );#}
     });
 
     function removePollHTML() {
