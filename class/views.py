@@ -102,6 +102,7 @@ def classhome(request, class_code):
 			user_object=User.objects.get(id=user_id)
 			polls = Poll.objects.filter(
 						time_stamp__lt= timezone.now(),
+						deadline__gte = timezone.now(),
 						class_id__class_code__exact = class_code
 					).order_by('-time_stamp')
 
@@ -120,6 +121,21 @@ def classhome(request, class_code):
 			
 			for i in all_topic:
 				context["all_tags"].append(i.name)
+
+			for i in polls:
+				vote = False
+				options = Option.objects.filter(poll_id = i)
+				for j in options:
+					stud_exist = OptionStudRelation.objects.filter(option_id = j ,stud_id = request.user)
+					if stud_exist:
+						vote = True
+						break
+				
+				newobj = {
+					"poll" : i ,
+					"vote" : vote
+				}
+				context["polls"].append(newobj)
 
 			for i in posts:
 				temp = ViewRelation.objects.filter(user_id=user_id, post_id=i.id).count()
@@ -156,7 +172,7 @@ def classhome(request, class_code):
 
 				
 
-
+			print(context["polls"])
 			return render(request, 'class/classhome.html', context)
 		else:
 			context = {
@@ -228,14 +244,14 @@ def new_post(request):
 		else:
 			is_draft=False
 
-		
-		tags_fetch = request.POST['tags_select']
-		tags_fetch = tags_fetch.split('&')
 		post_object = Post.objects.create(class_id=class_object,posted_by=posted_by,title=title,content=content,time_stamp=time_stamp,is_anonymous=is_anonymous,is_draft=is_draft)
-		for tag in tags_fetch:
-			id_name , tag = tag.split('=')
-			topic_post = Topic.objects.get(name = tag , class_id = class_object)
-			TopicPostRelation.objects.create(topic_id = topic_post , post_id = post_object)
+		if request.POST.get('tags_select'):
+			tags_fetch = request.POST['tags_select']
+			tags_fetch = tags_fetch.split('&')
+			for tag in tags_fetch:
+				id_name , tag = tag.split('=')
+				topic_post = Topic.objects.get(name = tag , class_id = class_object)
+				TopicPostRelation.objects.create(topic_id = topic_post , post_id = post_object)
 		return HttpResponse("success")
 	else:
 		return HttpResponse("Failed")

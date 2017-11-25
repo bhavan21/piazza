@@ -128,20 +128,19 @@
 
         <ul class="collection" style="margin-top: 0px;">
 
-            {% for i in poll %}
+            {% for i in polls %}
 
-            <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
+            <li class="collection-item post 
+            {% if not i.vote %}
+            unread-post
+            {% endif %}
+            "
+             onclick= "changeurlpoll({{i.poll.id}})" >
                 <b>{{i.poll.title}}</b><br>
                 
-<!-- 
-                { % for j in {{i.tags}} % }
-                    
-                    {{j.name}}
-
-                { % endfor %}  -->
-
-                <div class="wrap item">{{i.poll.content}}</div>
             </li>
+
+
             {% endfor %}
         </ul>
 
