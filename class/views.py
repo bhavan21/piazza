@@ -557,7 +557,6 @@ def add_students_to_class(request):
 				joins.stud_id = User.objects.filter(email__exact=stud_email)[0]
 				joins.time_stamp = timezone.now()
 				joins.save()
-				print("student added!")
 				# return redirect('/class/'+class_code+'/settings')
 				return HttpResponse(json.dumps({"status": "200", "message": "Student with id : "+stud_email+" added into class!"}))
 			else:
