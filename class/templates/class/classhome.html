@@ -149,6 +149,9 @@
 
     </div>
 
+    
+    <div id="post_section" class="col s12">
+
 <!-- Dropdown Trigger -->
     <button class='dropdown-button btn col s12' data-activates='dropdown1'>Choose tag</button>
 
@@ -158,9 +161,6 @@
             <li onclick="tagfunction('{{i}}')">{{i}}</li>
         {% endfor %}
     </ul>
-    
-    <div id="post_section" class="col s12">
-
         <!-- New post button -->
         <button id=newpost onclick="newpost_page()"><span style="font-size: 14px;display: inline-block;">New Post</span></button>
 
@@ -889,7 +889,7 @@
             function(data, status){
                 if(status == "success"){
                     // alert(data+ "\nsuccess");
-                   redirect_to_home(true);
+                   changeurl($('#question-dispaly').attr("data-content-postid"));
                 }
             });   
         }
