@@ -14,6 +14,11 @@
 
      <!-- Jquery Library-->
     <script type="text/javascript" src="{% static 'class/jquery.min.js' %}"></script>
+    <!-- Materialize JS -->
+    <script src="{% static 'class/materialize.min.js' %}"></script>
+    <style>
+        .class-info { width: 88% !important  }
+    </style>
 
 </head>
 <body>
@@ -33,27 +38,101 @@
             </ul>
             <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
         </div>
-    </nav>
+   </nav>
 
-    <ul id="tabs-swipe-demo" class="tabs center-align">
-    <li class="tab col s3"><a href="#test-swipe-1" class="active">Settings</a></li>
-    <li class="tab col s3"><a  href="#test-swipe-2">Studentd list</a></li>
-  </ul>
+   <ul id="tabs-swipe-demo" class="tabs center-align">
+        <li class="tab col s3"><a href="#test-swipe-1" class="active">Settings</a></li>
+        <li class="tab col s3"><a  href="#test-swipe-2">Students list</a></li>
+        <li class="tab col s3"><a  href="#test-swipe-3" >Polls</a></li>
+   </ul>
   <div id="test-swipe-1" class="col s12">
-
-  	<lable style="font-size: 30px;padding: 10px;"> Topics</label>
-  	<ul>
-  		<li class="chip purple darken-2">Lab1</li>
-  		<li class="chip purple darken-2">Lab1</li>
-  		<li class="chip purple darken-2">Lab1</li>
-  		<li class="chip purple darken-2">Lab1</li>
-	</ul>	
-  	
-  	<lable style="font-size: 30px;padding: 10px;"> Add Topic</label></h3><div style="padding: 10px;display: inline-block;"><a class="btn btn-floating btn-large cyan pulse"><i class="material-icons">edit</i></a></div>
-
+      <br><br>
+      <div class="row center-align">
+          <button data-target="modal-class-info" class="btn modal-trigger grey">Show Class Info</button>
+      </div>
+      <div id="modal-class-info" class="modal red class-info ">
+          <div class="modal-content">
+              <div class="row  " style="font-size: 100px">
+                  CODE : {{ class_code }}
+              </div>
+              <br><br><br><br><br>
+              <div class="row  " style="font-size: 100px">
+                  PASSWORD : {{ class_password }}
+              </div>
+          </div>
+      </div>
+      <br>
+      <div class="row" style="width: 70%;border-bottom: solid;border-bottom-color: #ffad99" >
+          <p></p>
+          <ul id="tabs-swipe-demo-1" class="tabs center-align">
+                <li class="tab col s3"><a href="#test-swipe-add-1">Add Student</a></li>
+                <li class="tab col s3"><a class="active" href="#test-swipe-2-add-2">Upload students csv</a></li>
+            </ul>
+          <div id="test-swipe-add-1" class="col s12">
+              <form action="{% url 'class:add_students_to_class' %}" method="post" enctype="multipart/form-data" class="col s6">
+                  <input hidden name="is_csv" value="0">
+                  <input hidden name="class_code" value={{ class_code }}>
+                  <div class="input-field col s12">
+                      <input id="stud_email" name="stud_email" type="email" placeholder="Email" class="validate">
+                  </div>
+                  <div class="row">
+                      <input type="submit" class="waves-effect waves-light btn" value="Add Student"/>
+                  </div>
+              </form>
+          </div>
+          <div id="test-swipe-2-add-2" class="col s12">
+              <p></p>
+              <form action="{% url 'class:add_students_to_class' %}" method="post" enctype="multipart/form-data" class="col s6">
+                  <input hidden name="is_csv" value="1">
+                  <input hidden name="class_code" value={{ class_code }}>
+                  <div class="row">
+                      <div class = "file-field">
+                          <div class = "btn">
+                              <span>Browse</span>
+                              <input type = "file" accept="text/csv" name="students_data">
+                          </div>
+                          <div class="file-path-wrapper">
+                              <input class="file-path validate" type="text">
+                          </div>
+                      </div>
+                  </div>
+                  <div class="row">
+                      <input type="submit" class="waves-effect waves-light btn" value="Add Students"/>
+                  </div>
+              </form>
+          </div>
+      </div>
+      <br><br>
+      <div class="row">
+          {% if is_active %}
+              <button class="waves-effect waves-light btn red col s3 offset-s2" onclick="changeClassActivity(1)" id="classActivity">Deactivate Class</button>
+          {% else %}
+              <button class="waves-effect waves-light btn red col s3 offset-s2" onclick="changeClassActivity(0)" id="classActivity">Activate Class</button>
+          {% endif %}
+      </div>
+      <br><br>
+      <div class="row center-align" style="width: 50%">
+          <h4 style="color: #8c9eff">Topics</h4>
+          <div class="row center-align" id="topic_tags">
+              {% for tag in tags %}
+                  <div class="chip">
+                    {{ tag.name }}
+                  </div>
+              {% endfor %}
+          </div>
+      </div>
+      <div class="row center-align">
+          <form action="/class/add_tag" id="add_tag_to_class" method="post">
+              <div class="row" style="width: 50%">
+                  <input hidden name="class_code" value="{{ class_code }}">
+                  <input name="new_tag" placeholder="New Topic" required="" type="text" id="new_tag_input">
+                  <button class="btn waves-effect waves-light" type="submit">Add Topic</button>
+              </div>
+          </form>
+      </div>
   </div>
   <div id="test-swipe-2" class="col s12">
-  	<table class="centered bordered">
+  	<table class="centered bordered" id="stud_list">
         <thead>
           <tr>
               <th>Name</th>
@@ -67,34 +146,252 @@
 			<tr>
 			<td>{{stud.first_name}} {{stud.last_name}}</td>
 			<td>{{stud.email}}</td>
-			<td><button class="waves-effect waves-light btn red" onclick="delete_stud({{stud.id}})">DELETE</button></td>
+			<td><button class="waves-effect waves-light btn red" onclick="delete_stud(this,{{stud.id}})">DELETE</button></td>
 			</tr>
 			{% endfor %}
         </tbody>
     </table>
 
   </div>
+  <div id="test-swipe-3" class="col s12">
+      <div class="row" id="pollsList">
+          <table class="centered " id="stud_list">
+              <thead>
+                  <tr>
+                      <th>Poll Title</th>
+                      <th>Poll Options</th>
+                      <th>Number of selections/attempts</th>
+                      <th>Deadline</th>
+                  </tr>
+              </thead>
+              <tbody id="pollsBody">
+                  {% for i in polls %}
+                      <tr>
+                          <td style="font-size: 30px; color: #2bbbad">{{ i.title }}</td>
+                          <td></td>
+                          <td>0</td>
+                          <td>{{ i.deadline }}</td>
+                      </tr>
+                      {% for j in i.optionsArray %}
+                          <tr>
+                              <td></td>
+                              <td>{{ j.content }}</td>
+                              <td>{{ j.count }}</td>
+                              <td></td>
+                          </tr>
+                      {% endfor %}
+                  {% endfor %}
+              </tbody>
+          </table>
+      </div>
+      <!-- Modal Trigger -->
+      <button data-target="modal1" class="btn modal-trigger">Create a new Poll</button>
 
+      <!-- Modal Structure -->
+      <div id="modal1" class="modal modal-fixed-footer">
 
-
-
-<!-- Materialize JS -->
-<script src="{% static 'class/materialize.min.js' %}"></script>
+        <div class="modal-content">
+            <div class="row">
+                <h4 class="center-align">Create Poll</h4>
+                <form class="col s12" method="post" action="/class/add_poll" id="pollCreate">
+                    <input hidden name="class_code" value={{ class_code }}>
+                    <div class="row">
+						<div class="input-field col s6">
+							<input id="poll_title" name="poll_title" type="text" class="validate" required="">
+							<label for="poll_title">Poll Title</label>
+						</div>
+					</div>
+                    <div class="row" style="color:#2BB5A8">
+                        Options
+                    </div>
+                        <div class="row">
+                            <div class="input-field col s6">
+                                <input type="text" class="validate" name="pollOptions[]" required="" id="first_poll_option">
+                            </div>
+                        </div>
+                    <div class="row" id="poll_options">
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input type="button" value="Add Poll Option" onclick="addPollOption('poll_options')" class="waves-light waves-effect" style="color: #2BB5A8">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label>Deadline Date: </label>
+                        <input type="date" class="datepicker" name="deadline_date" id="poll_deadline_date" required="">
+                    </div>
+                    <div class="row">
+                        <label>Deadline time: </label>
+                        <input type="time" class="timepicker" name="deadline_time" id="poll_deadline_time" required="">
+                    </div>
+                    <div class="row">
+                        <input type="checkbox" id="is_multi" name="is_multi"/>
+                        <label for="is_multi">Is Multiple Option Poll</label>
+                    </div>
+                    <button class="modal-action modal-close btn waves-effect waves-light" type="submit">Add Poll</button>
+                </form>
+                <div class="row center-align">
+                    <button class="modal-action modal-close btn waves-effect waves-light" onclick="removePollHTML()">Cancel</button>
+                </div>
+            </div>
+        </div>
+      </div>
+  </div>
 
 <script type="text/javascript">
-	function delete_stud(student_id){
-		$.post("/class/delete_stud",
-            {
-                student_id: student_id,
-                class_code: "{{class_code}}"
-            },
-            function(data, status){
-                if(status == "success"){
-                    // alert(data+ "\nsuccess");
-                    location.reload();
+
+    function changeClassActivity(is_active) {
+        var tempString;
+        if(is_active)
+            tempString = "Are you sure you want to de-activate the class?";
+        else tempString = "Are you sure you want to activate the class?";
+        if(confirm(tempString)){
+            $.post("/class/change_class_activity",
+                {
+                    class_code: "{{ class_code }}"
+                },
+                function (data, status) {
+                    if(status == "success"){
+                        data = JSON.parse(data);
+                        if(data["status"] == "200"){
+                            console.log(is_active);
+                            if(is_active){
+                                document.getElementById("classActivity").innerHTML = "Activate Class";
+                                document.getElementById("classActivity").setAttribute("onclick","changeClassActivity(0)")
+                            }
+                        else{
+                                document.getElementById("classActivity").innerHTML = "Deactivate Class";
+                                document.getElementById("classActivity").setAttribute("onclick","changeClassActivity(1)")
+                            }
+                            alert("Class activity changed!");
+                        }else{
+                            alert("Unable Change class activity! Please try again!");
+                        }
+                    }else{
+                        alert("Network Error! Try Again!");
+                    }
                 }
-            });   
+            )
+        }
+    }
+
+	function delete_stud(r,student_id,first_name,last_name){
+		if(confirm("Are you sure you want to remove this student from the class" )) {
+            $.post("/class/delete_stud",
+                {
+                    student_id: student_id,
+                    class_code: "{{class_code}}"
+                },
+                function (data, status) {
+                    if (status == "success") {
+                        data = JSON.parse(data);
+                        if (data["status"] == "200") {
+                            var i = r.parentNode.parentNode.rowIndex;
+                            document.getElementById("stud_list").deleteRow(i);
+                            alert("Student removed from the class");
+                        } else {
+                            alert("Unable to delete from database!");
+                        }
+                    } else {
+                        alert("Network Error! Try again!");
+                    }
+                }
+            );
+        }
 	}
+
+	$(document).ready(function(){
+        // the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered
+        $('.modal').modal();
+    });
+
+
+	function addPollOption(divName){
+        var new_div = document.createElement('div');
+        new_div.className = "row";
+        new_div.innerHTML = "<div class=\"input-field col s6\">"+"\n"+
+                                "<input type=\"text\" class=\"validate\" name=\"pollOptions[]\" required=\"\">"+"\n"+
+                            "</div>";
+        document.getElementById(divName).appendChild(new_div);
+    }
+    
+    $("#pollCreate").submit(function(event){
+        event.preventDefault();
+        var $form = $( this ),
+            url = $form.attr( 'action' );
+        $.post(url,
+            $("#pollCreate").serialize(),
+            function (data, status) {
+                if(status == "success"){
+                    data = JSON.parse(data);
+{#                    console.log(data);#}
+                    if(data["status"] == "200"){
+                        document.getElementById("poll_title").value = "";
+                        document.getElementById("first_poll_option").value = "";
+                        document.getElementById("poll_deadline_date").value = "";
+                        document.getElementById("poll_deadline_time").value = "";
+                        document.getElementById("is_multi").checked = false;
+                        var new_tr;
+                        var new_td;
+                        var htmlString;
+                        new_tr = document.createElement('tr');
+                        htmlString = "                      <td style=\"font-size: 30px; color: #2bbbad\">"+data['title']+"</td>\n" +
+                            "                      <td></td>\n" +
+                            "                      <td>0</td>\n" +
+                            "                      <td>"+data["time"]+"</td>\n";
+                        new_tr.innerHTML = htmlString;
+                        document.getElementById("pollsBody").appendChild(new_tr);
+                        for(var i = 0; i<data['poll_options'].length; i++){
+                            new_tr = document.createElement('tr');
+                            htmlString = "                      <td></td>\n" +
+                                "                      <td>"+data['poll_options'][i]+"</td>\n" +
+                                "                      <td>0</td>\n" +
+                                "                      <td></td>\n";
+                            new_tr.innerHTML = htmlString;
+                            document.getElementById("pollsBody").appendChild(new_tr);
+                        }
+                        alert("Poll with title : "+data['title']+" added!");
+                    }else{
+                        alert("Unable to add poll, please try again!");
+                    }
+                }else{
+                    alert("Network error! Try again!");
+                }
+            }
+
+        );
+        removePollHTML();
+    });
+
+	$("#add_tag_to_class").submit(function (event) {
+        event.preventDefault();
+        var $form = $( this ),
+            url = $form.attr( 'action' );
+        $.post(url,
+            $("#add_tag_to_class").serialize(),
+            function (data, status) {
+                if(status == "success"){
+                    data = JSON.parse(data);
+                    if(data['status'] == "200"){
+                        var div = document.createElement('div');
+                        div.className = "chip";
+                        div.innerHTML = data['tag'];
+                        document.getElementById("topic_tags").appendChild(div);
+                        document.getElementById("new_tag_input").value = "";
+                        alert("New Tag : "+data['tag']+" added");
+                    }else{
+                        alert("Unable to add tag!");
+                    }
+                }else{
+                    alert("Network Error! Try again!");
+                }
+            }
+        )
+    });
+
+    function removePollHTML() {
+        document.getElementById("poll_options").innerHTML = "";
+    }
 
 </script>
 

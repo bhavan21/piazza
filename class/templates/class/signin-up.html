@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SignIn-SignUp</title>
+    <link rel="stylesheet" href="{% static 'class/materialize.min.css' %}" type="text/css" >
+
+    <script src="{% static 'class/materialize.min.js' %}"></script>
+    <!-- Jquery Library-->
+    <script type="text/javascript" src="{% static 'class/jquery.min.js' %}"></script>
+    <!-- Materialize JS -->
+    <script src="{% static 'class/materialize.min.js' %}"></script>
+
+</head>
+<body>
+
+    <nav class="light-blue lighten-1" role="navigation">
+        <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">For'Dis</a>
+          <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+        </div>
+    </nav>
+    <div class="row" style="width: 50%">
+        <ul id="tabs-swipe-demo" class="tabs">
+            <li class="tab col s3"><a class="active" href="#test-swipe-1">Sign-In</a></li>
+            <li class="tab col s3"><a href="#test-swipe-2">Sign-Up</a></li>
+        </ul>
+        <div id="test-swipe-1" class="col s12">
+            <form class="col s6" action="login" method="post">
+                <div class="row">
+                    <div class="light-blue" style="color: whitesmoke;border-radius: 5px">{{ error }}</div>
+                    <div class="input-field col s12">
+                        <input id="email" name="email" type="email" placeholder="Email" class="validate" required="">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="password" name="password" type="password" placeholder="Password" class="validate">
+                    </div>
+                </div>
+                {% if next %}
+                    <input hidden name="next" value={{next}}>
+                {% endif %}
+                <div class="row">
+                    <input type="submit" class="waves-effect waves-light btn" value="Login"/>
+                </div>
+            </form>
+        </div>
+        <div id="test-swipe-2" class="col s12">
+            <form class="col s8" action="register" method="post">
+                <div class="row">
+                    <div class="light-blue" style="color: whitesmoke;border-radius: 5px">{{ error }}</div>
+                    <div class="input-field col s6">
+                        <input id="first_name" name="first_name" type="text" placeholder="First name" class="validate">
+                    </div>
+                <div class="input-field col s6">
+                    <input id="last_name" name="last_name" type="text" placeholder="Last Name" class="validate">
+                </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="email" name="email" type="email" placeholder="Email" class="validate">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="password" name="password" type="password" placeholder="Password" class="validate">
+                    </div>
+                </div>
+                <div class="row">
+                    <input type="submit" class="waves-effect waves-light btn" value="Register"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

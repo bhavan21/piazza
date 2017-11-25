@@ -6,6 +6,9 @@
 	<link rel="stylesheet" href="{% static 'class/iconFamilyMaterialIcons.css' %}">
 	<script type="text/javascript" src="{% static 'class/jquery-3.2.1.min.js' %}"></script>
 	<script src="{% static 'class/materialize.min.js' %}"></script>
+
+    <script src="{% static 'class/jquery.webui-popover.min.js' %}"></script>
+	<link rel="stylesheet" href="{% static 'class/jquery.webui-popover.min.css' %}">
 	<script >
 		$(document).ready(function() {
 			$('#modal_join').modal();
@@ -67,15 +70,33 @@
 	<nav class="light-blue lighten-1" role="navigation">
 		<div class="nav-wrapper container"><a id="logo-container" href="" class="brand-logo">ForDis</a>
 			<ul class="right hide-on-med-and-down">
-				<li>{{first_name}} {{last_name}}</li>
+				<li>{{first_name}} {{last_name}}  </li>
+                <li><a id="update_password_button" href="">Update Password</a></li>
 				<li><a href="logout">Logout</a></li>
 			</ul>
 
-			<ul id="nav-mobile" class="side-nav">
+            <ul id="nav-mobile" class="side-nav">
 				<li>{{first_name}} {{last_name}}</li>
 				<li><a href="login">Logout</a></li>
 			</ul>
-			<a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+            <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+            <div id='update_password_dropdown' class='webui-popover-content'>
+                <form id="update_password" action="/class/update_account_password" method="post" class="" >
+                    <div class="row">
+						<div class="input-field ">
+							<input id="old_password" name="old_password" type="password" class="validate" required="" placeholder="Current Password">
+						</div>
+                    </div>
+                    <div class="row">
+						<div class="input-field ">
+							<input id="new_password" name="new_password" type="password" class="validate" required="" placeholder="New Password">
+						</div>
+					</div>
+                    <div class="row">
+                        <input type="submit" class="waves-effect waves-light btn" value="Update Password"/>
+                    </div>
+                </form>
+            </div>
 		</div>
 	</nav>
 
@@ -229,8 +250,8 @@
 			</a>
 			<div class="card-action">
 				<span class = "black-text" >{{akh.class_id.semester}} , {{akh.class_id.year}} </span>
-				<a href="{{akh.class_id.class_code}}/settings" style="float: right;">Settings</a>
-				<span class="orange-text"  style="float: right;">Activity</span>
+				<a href="javascript:dropCourse('{{ akh.class_id.class_code }}')" style="float: right; " >Drop Course</a>
+
 			</div>
 		</div>
 	</div>
@@ -246,4 +267,52 @@
 
 
 </body>
+<script>
+    $('#update_password_button').webuiPopover({url:'#update_password_dropdown'});
+
+    $("#update_password").submit(function(event){
+        event.preventDefault();
+        var $form = $( this ),
+            url = $form.attr( 'action' );
+        $.post(url,
+            $("#update_password").serialize(),
+            function (data, status) {
+                if(status == "success") {
+                    data = JSON.parse(data);
+                    if(data['status']=="200"){
+                        alert("Password Updated!");
+                    }else{
+                        alert("Unable to update the password!");
+                    }
+                }else{
+                    alert("Nework Error! Try again!");
+                }
+            }
+        );
+
+        document.getElementById("old_password").value = "";
+        document.getElementById("new_password").value = "";
+    });
+
+    function dropCourse(class_code) {
+        $.post('/class/stud_drop_course',
+            {
+                'class_code': class_code
+            },
+            function (data, status) {
+                if(status == "success"){
+                    data = JSON.parse(data);
+                    if(data['status'] == "200"){
+                        alert('Class is dropped!');
+                        location.reload();
+                    }else{
+                        alert('You are unable to drop this course!');
+                    }
+                }else{
+                    alert('Network Error! Try Again!');
+                }
+            }
+        );
+    }
+</script>
 </html>

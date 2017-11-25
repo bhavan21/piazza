@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 from django.contrib.auth.models import User
 
 
@@ -68,6 +67,7 @@ class Comment(models.Model):
 	time_stamp = models.DateTimeField()
 	is_anonymous=models.BooleanField(default=False)
 
+
 class Poll(models.Model):
 	class_id = models.ForeignKey(Class, on_delete=models.CASCADE)
 	posted_by = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -85,5 +85,5 @@ class Option(models.Model):
 
 
 class OptionStudRelation(models.Model):
-	option_id =  models.ForeignKey(Option, on_delete=models.CASCADE)
+	option_id = models.ForeignKey(Option, on_delete=models.CASCADE)
 	stud_id = models.ForeignKey(User, on_delete=models.CASCADE)
