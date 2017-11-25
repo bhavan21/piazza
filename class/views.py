@@ -249,6 +249,10 @@ def new_post(request):
 				id_name , tag = tag.split('=')
 				topic_post = Topic.objects.get(name = tag , class_id = class_object)
 				TopicPostRelation.objects.create(topic_id = topic_post , post_id = post_object)
+		ViewRelation.objects.create(user_id=posted_by,post_id=post_object)
+		post_object.views=post.views+1
+		post_object.save()
+
 		return HttpResponse("success")
 	else:
 		return HttpResponse("Failed")
@@ -425,6 +429,7 @@ def get_post(request):
 		data["id"]=post.id
 		data["title"]=post.title
 		data["content"]=post.content
+		data["is_draft"]=post.is_draft
 		if post.is_anonymous:
 			data["posted_by"]={"name":"Anonymous User"}
 		else:
