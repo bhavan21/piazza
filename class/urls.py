@@ -29,4 +29,6 @@ urlpatterns = [
 	url(r'^stud_drop_course$', views.stud_drop_course, name='stud_drop_course'),
 	url(r'^edit_comment$', views.edit_comment, name='edit_comment'),
 	url(r'^delete_comment$', views.delete_comment, name='delete_comment'),
+	url(r'^fetchposts$', views.fetchposts, name='fetchposts'),
+	url(r'^tagposts$', views.tagposts, name='tagposts'),
 ]

@@ -27,8 +27,16 @@
 }
 #search-icon {
     float: right;
-    margin-right: 15px;
-    margin-top: -38px;
+    margin-right: 8px;
+    margin-top: -45px;
+    position: relative;
+    z-index: 2;
+    color: green;
+}
+#close-icon {
+    float: right;
+    margin-right: 8px;
+    margin-top: -45px;
     position: relative;
     z-index: 2;
     color: green;

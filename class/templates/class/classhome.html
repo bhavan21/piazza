@@ -148,6 +148,16 @@
 
 
     </div>
+
+<!-- Dropdown Trigger -->
+    <button class='dropdown-button btn col s12' data-activates='dropdown1'>Choose tag</button>
+
+    <!-- Dropdown Structure -->
+    <ul id='dropdown1' class='dropdown-content'>
+        {% for i in all_tags %}
+            <li onclick="tagfunction('{{i}}')">{{i}}</li>
+        {% endfor %}
+    </ul>
     
     <div id="post_section" class="col s12">
 
@@ -155,8 +165,9 @@
         <button id=newpost onclick="newpost_page()"><span style="font-size: 14px;display: inline-block;">New Post</span></button>
 
         <!-- Search bar -->
-        <input id="search-box"  placeholder="Search..."  name="search"/>
-        <a href="#"><i id="search-icon" class="small material-icons">search</i></a>
+        <input id="search-box"  placeholder="Search..."  name="search">
+        <button id="search-icon" style="display: inline-block;"><i class="small material-icons">search</i></button>
+        <button id="close-icon" style="display: none;"><i class="small material-icons">close</i></button>
 
 
             <ul class="collapsible" data-collapsible="accordion">
@@ -197,7 +208,7 @@
 
 
 
-            <ul class="collection" style="margin-top: 0px;">
+            <ul id="allposts" class="collection" style="margin-top: 0px;">
             {% for i in posts %}
             <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
                 <h6>{{i.post.title}}</h6><br>
@@ -207,6 +218,7 @@
             </li>
             {% endfor %}
             </ul>
+            <div id="fetchedposts" style="display: none;"></div>
         </ul>
     </div>
   
@@ -822,6 +834,50 @@
         $(".comment-dispaly", comment_block).css("display","block");
     }
 
+
+    function tagfunction(tagname){
+        tagname = tagname.replace('+', ' ');
+        // tagname.replace(/+/g,' ');
+        $.get("/class/tagposts",
+        {
+            class_code: "{{class_code}}",
+            tagname: tagname      
+        },
+        function(data, status){
+            if(status == "success"){
+                var obj = JSON.parse(data);
+                $("#fetchedposts").empty();
+                var ul_class = document.createElement('ul');
+                ul_class.className = "collection";
+                var post;
+                // $("#fetchedposts").append("<ul class=\"collection\" style=\"margin-top: 0px;\">");
+                $.each(obj.fetchedposts, function(){
+                    post = document.createElement('li');
+                    post.classList.add("collection-item");
+                    post.classList.add("post");
+                    if(!this.seen){
+                        post.classList.add("unread-post");
+                    }
+                    var id = this.id;
+                    (function(value){
+                        post.addEventListener("click", function(){
+                            changeurl(value);   
+                        }, false);})(id)
+                    post.innerHTML = this.title;
+                    
+                    // var post = "<li class=\"collection-item post {% if not "+this.seen+" %}unread-post{% endif %}\" onclick=\"changeurl("+this.id+")\" data-postid="+this.id+">"+this.title+"</li>";
+                    ul_class.appendChild(post);
+                });
+                // $("fetchedposts").append("</ul>");
+                $("#fetchedposts").append(ul_class);
+                $("#fetchedposts").css("display","block");
+                $("#allposts").css('display','none');
+                $("#search-icon").css("display","none")
+                $("#close-icon").css("display","block")            
+            }
+        });
+    }    
+
     function delete_comment(commentid){
         if(confirm("Are you sure to delete this comment?")){
             $.post("/class/delete_comment",
@@ -1012,6 +1068,59 @@
                 $("#post-comment").prop('disabled',false);
             });
         });
+
+        $("#search-icon").click(function(e) {
+            $.get("/class/fetchposts",
+            {
+                class_code: "{{class_code}}",
+                search_key: $('#search-box').val()      
+            },
+            function(data, status){
+                if(status == "success"){
+                    $("#allposts").css('display','none');
+                    $("#close-icon").css("display","inline-block")            
+                    $("#search-icon").css("display","none")
+                    var obj = JSON.parse(data);
+                    $("#fetchedposts").empty();
+                    var ul_class = document.createElement('ul');
+                    ul_class.className = "collection";
+                    var post;
+                    // $("#fetchedposts").append("<ul class=\"collection\" style=\"margin-top: 0px;\">");
+                    $.each(obj.fetchedposts, function(){
+                        post = document.createElement('li');
+                        post.classList.add("collection-item");
+                        post.classList.add("post");
+                        if(!this.seen){
+                            post.classList.add("unread-post");
+                        }
+                        var id = this.id;
+                        (function(value){
+                            post.addEventListener("click", function(){
+                                changeurl(value);   
+                            }, false);})(id)
+                        post.innerHTML = this.title;
+                        
+                        // var post = "<li class=\"collection-item post {% if not "+this.seen+" %}unread-post{% endif %}\" onclick=\"changeurl("+this.id+")\" data-postid="+this.id+">"+this.title+"</li>";
+                        ul_class.appendChild(post);
+                    });
+                    // $("fetchedposts").append("</ul>");
+                    $("#fetchedposts").append(ul_class);
+                    $("#fetchedposts").css("display","block");
+                    // document.getElementById("allposts").style.display='none';
+                    // document.getElementById("fetchedposts").style.display='block';
+                }
+            });
+        });
+
+        $("#close-icon").click(function() {
+            $("#allposts").css('display','block');
+            $("#fetchedposts").css("display","none");
+            $("#close-icon").css("display","none")            
+            $("#search-icon").css("display","inline-block")            
+        });
+
+
+
 });
 
 </script>

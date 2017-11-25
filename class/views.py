@@ -770,6 +770,82 @@ def add_tag(request):
 
 @csrf_exempt
 @login_required(login_url=loginURL)
+def fetchposts(request):
+	user_id = request.session.get("id")
+	class_code = request.GET['class_code']
+	search_key = request.GET['search_key']
+	if is_class_taken(user_id,class_code):
+		posts = Post.objects.filter(
+					time_stamp__lt=timezone.now(),
+					class_id__class_code__exact=class_code,
+					title__contains=search_key,
+					is_draft=False
+				).order_by('-time_stamp')
+
+		data = {
+			'fetchedposts': []
+		}
+		for i in posts:
+			temp = ViewRelation.objects.filter(user_id=user_id, post_id=i.id).count()
+			if temp > 0:
+				seen = True
+			else:
+				seen = False
+			newobj = {
+				'id': i.id,
+				'title': i.title,
+				'seen': seen
+			}
+			data["fetchedposts"].append(newobj)
+			# data["fetchedtitle"].append(i.title)
+			# data["fetchedseen"].append(seen)
+		return HttpResponse(json.dumps(data))
+		# return render(request, 'class/classhome.html', context)
+	else:
+		# context = {
+		# 	'fetchedposts': [],
+		# 	# 'posts': [],
+		# 	'error': 'This class is not taken by you'
+		# }
+		return HttpResponse("Failed")
+
+@csrf_exempt
+@login_required(login_url=loginURL)
+def tagposts(request):
+	user_id = request.session.get("id")
+	class_code = request.GET['class_code']
+	tagname = request.GET['tagname']
+	print(tagname)
+	if is_class_taken(user_id,class_code):
+		posts = TopicPostRelation.objects.filter(
+					topic_id__name__exact=tagname,
+					post_id__class_id__class_code__exact=class_code,
+					post_id__time_stamp__lt=timezone.now(),
+					post_id__is_draft=False
+					).order_by('-post_id__time_stamp')	
+		data = {
+			'fetchedposts': []
+		}
+		for i in posts:
+			temp = ViewRelation.objects.filter(user_id=user_id, post_id=i.post_id).count()
+			post = Post.objects.filter(id=i.post_id_id)[0]
+			if temp > 0:
+				seen = True
+			else:
+				seen = False
+			newobj = {
+				'id': post.id,
+				'title': post.title,
+				'seen': seen
+			}
+			data["fetchedposts"].append(newobj)
+		return HttpResponse(json.dumps(data))
+	else:
+		return HttpResponse("Failed")
+
+
+@csrf_exempt
+@login_required(login_url=loginURL)
 def stud_drop_course(request):
 	user_id = request.session.get("id")
 	class_code = request.POST['class_code']
