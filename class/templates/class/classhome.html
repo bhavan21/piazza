@@ -224,6 +224,29 @@
     <!-- Content -->
     <div id="content" style="padding-bottom: 50px;">
 
+        <div id="poll-display-block" style="display : none ;">
+                    <div class="col s9">
+                        <h3 id="poll-title"></h3>
+                    </div> 
+                    
+
+                    
+                <div class="row">
+                    <div class="col s6"> </div>
+                    <div class="col s3">Post Time: <br><span id="poll-time">25th July</span></div>
+                    <div class="col s3">Post Deadline: <br><span id="poll-deadline">25th July</span> </div>
+                </div>
+
+                    <div id="poll-options">
+                        
+                    </div>
+
+                    <button id="vote-button" style="display: hidden" type="button" class="btn waves-effect waves-light">Vote<i class="material-icons right">send</i></button>
+        </div>
+
+
+
+
         <!-- Block for showing a question/post (Initially display none) -->
         <div id="post-display-block" style="display: none;">
 
@@ -342,6 +365,7 @@
                 <h6>Details:</h6>
                 <textarea id="froala-editor-newquestion" name="des"></textarea>
 
+
                 <div class="row" style="padding-top: 10px;">
                     <div class="input-field col s3">
                         <select id="post-is-anonymous">
@@ -403,6 +427,137 @@
     }
 
     // this function is called when a post in side bar is clicked or when url has a numeric postid
+     function  changeurlpoll(poll_id,push_url = true)
+     {
+        $.ajax(
+        {
+            type : "GET",
+            url : "/class/get_poll" ,
+            data : 
+            {
+                poll_id : poll_id ,
+                class_code : "{{class_code}}"
+            },
+            success:function(data) 
+            {
+
+
+            var json_obj = JSON.parse(data);           
+            $("#new-question").css("display","none");
+            $("#post-display-block").css("display","none");
+            $("#poll-display-block").css("display","block");
+            
+            $("#poll-title").html(json_obj.title);
+            $("#poll-time").html(json_obj.time_stamp);
+            $("#poll-deadline").html(json_obj.deadline);
+            
+            $("#poll-options").html("");
+
+
+
+            var truel = json_obj.is_ins ;
+
+
+            // truel = false;
+
+            if(truel)
+            {
+
+                var results = "<h3> Results -->"+ json_obj.attempts  +"Attempts</h3>"
+                $('#poll-options').append(results);
+
+                for (var i = 0; i < json_obj.options.length; i++)
+                 {
+                    var counter = "<h5  class=\" black-text \">"+ json_obj.options[i].option_name + " --->"  +json_obj.options[i].option_count +" Votes </h5> <br>" ;
+                    $('#poll-options').append(counter);       
+                 }
+                 $('#vote-button').hide();
+            }
+
+            else
+               {
+
+                if(json_obj.is_multi)
+                {
+
+
+                    poll_id_to_send = json_obj.id ; 
+                    ism  = true ;
+
+                var select_options =  '<h6> Select One or More Options </h6> <form id = "multiple_option">  ' ;
+
+                    // select_options = select_options + '<input type="hidden" value = "'+ json_obj.id+'" name = "poll_id" />' ;
+                    for ( var i = 0 ; i < json_obj.options.length; i++)
+                    {
+                        var sl = json_obj.options[i] ;
+
+                        var opt =  '<p> <input type ="checkbox"' ;
+                        if(sl.checked)
+                        {
+                            opt = opt + ' checked = "checked" ' ;
+                        }
+                   opt = opt + 'name ="'+ sl.option_id +'" '  +' id="' + sl.option_id + '" class = "filled-in" />      <label for="'+sl.option_id+'">'+ sl.option_name+'</label> </p>' ;
+                        select_options = select_options + opt ; 
+                    }
+
+
+                
+                // select_options = select_options + '<input type="hidden" value = "multiple" name = "ism" />';
+
+                    select_options = select_options + ' </form>  ' ;
+
+
+
+                    $("#poll-options").append(select_options);
+                    
+                    $("#vote-button").show();
+
+                }
+                else
+                {
+
+                    poll_id_to_send = json_obj.id;
+                    ism = false ;
+
+                var select_options =  '<h6> Select One  Option Among these </h6> <form id = "multiple_option">  ' ;
+
+                    // select_options = select_options + '<input type="hidden" value = "'+ json_obj.id+'" name = "poll_id" />' ;                 
+                    for ( var i = 0 ; i < json_obj.options.length; i++)
+                    {
+                        var sl = json_obj.options[i] ;
+
+                        var opt =  '<p> <input name = "group1" type ="radio"' ;
+                        if(sl.checked)
+                        {
+                            opt = opt + ' checked = "checked" ' ;
+                        }
+                   opt = opt + 'value = "' + sl.option_id +  '" id="' + sl.option_id + '" class = "filled-in" />      <label for="'+sl.option_id+'">'+ sl.option_name+'</label> </p>' ;
+                        select_options = select_options + opt ; 
+                    }
+
+                // select_options = select_options + '<input type="hidden" value = "single" name = "ism" />';
+
+
+                    select_options = select_options + ' </form>  ' ;
+
+
+
+                    $("#poll-options").append(select_options);
+                    
+                    $("#vote-button").show();
+                
+                }
+
+                   
+               } 
+
+            }
+
+        }
+            );
+ 
+     }
+
     function changeurl(post_id,push_url=true) {
 
         cancel_editquestion();
@@ -420,6 +575,7 @@
 
             // displaying the block to show the question/post
             $("#new-question").css("display","none");
+            $("#poll-display-block").css("display","none");
             $("#post-display-block").css("display","block");
 
             // Loading the question and its comments into content block
@@ -508,6 +664,7 @@
         console.log("called");
 
         $("#post-display-block").css("display","none");
+        $("#poll-display-block").css("display","none");
         $("#new-question").css("display","block");
 
          $('.post').removeClass('active-post');
@@ -700,10 +857,23 @@
 
     $( document ).ready(function(){
 
+
+        poll_id_to_send = 12 ;
+        ism = false ;
+
          // parsing the url on pageload and displaying the appropriate post in content block
         var urlparse = window.location.pathname.split("/");
         // alert(urlparse[3]);
         tail=urlparse[3];
+        if(tail == "poll")
+        {
+            if($.isNumeric(urlparse[4]))
+            {
+                changeurlpoll(urlparse[4],false);
+            }
+            else
+                redirect_to_home();
+        }
         if(tail=="newpost"){
             newpost_page(false);
         }else if($.isNumeric(tail)){
@@ -760,6 +930,30 @@
             });   
         });
 
+        $("#vote-button").click(function()
+            {
+                $.post("/class/submit_poll" ,
+                
+                {
+                    class_code: "{{class_code}}",
+                    form_data : $('#multiple_option').serialize() ,
+                    poll_id  : poll_id_to_send ,
+                    multiple_option : ism 
+                } , 
+                function(data,status)
+                {
+                    if(status == "success")
+                    {
+                        Materialize.toast("Successfully Voted" , 4000);
+                    }
+                }
+                    );
+                
+                
+
+            }
+
+            );
 
          // function to schedule post
         $("#schedule-post").click(function(){

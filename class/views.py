@@ -9,6 +9,7 @@ import datetime
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from io import TextIOWrapper
+from django.db.models import F
 import csv
 
 
@@ -168,10 +169,6 @@ def classhome(request, class_code):
 						context["pins"].append(newobj)
 				if i.is_draft==1 and i.posted_by.id==user_id:
 					context["drafts"].append(newobj)
-
-				
-
-			print(context["polls"])
 			return render(request, 'class/classhome.html', context)
 		else:
 			context = {
@@ -205,6 +202,7 @@ def join_form(request):
 @login_required(login_url=loginURL)
 def create_form(request):
 	course_code = request.POST['classcode']
+	passing_code = request.POST['passingcode']
 	class_name = request.POST['classname']
 	semester = request.POST['semester']
 	year = request.POST['year']
@@ -213,7 +211,7 @@ def create_form(request):
 		matched = Class.objects.filter(class_code=class_code)
 		if not matched:
 			break
-	some = Class.objects.create(course_name=class_name, course_code=course_code, year=year, semester=semester,class_code=class_code)
+	some = Class.objects.create(course_name=class_name,class_password= passing_code , course_code=course_code, year=year, semester=semester,class_code=class_code)
 	ClassInsRelation.objects.create(class_id=some, ins_id=request.user, time_stamp=timezone.now())
 	return HttpResponse("success")
 
@@ -319,11 +317,95 @@ def edit_post(request):
 	else:
 		return HttpResponse("Failed")
 
+@csrf_exempt
+@login_required(login_url = loginURL)
+def get_poll(request):
+	user_id = request.session.get("id")
+	class_code = request.GET['class_code']
+	poll_id = request.GET['poll_id']
+	poll_present = Poll.objects.filter(class_id__class_code__exact = class_code,id =poll_id)
+	if is_class_taken(user_id,class_code) and poll_present:
+		data = {}
+		poll = Poll.objects.get(id = poll_id)
+		data["id"] = poll.id
+		data["title"] = poll.title
+		data["time_stamp"] = poll.time_stamp.strftime("%b %d, %I:%M %p")
+		data["deadline"] = poll.deadline.strftime("%b %d, %I:%M %p")
+		data["is_multi"] = poll.check_multiple
+		data["attempts"] = poll.attempts
+		data["is_ins"] = False
+		if (poll.posted_by.id == user_id):
+			data["is_ins"] = True
+		data["options"] = []
+		options_list = Option.objects.filter(poll_id = poll)
+		for op in options_list:
+			opt_buf = {}
+			opt_buf["option_name"] = op.content
+			opt_buf["option_id"]= op.id
+			opt_buf["option_count"] = op.count
+			check_option = OptionStudRelation.objects.filter(option_id = op,stud_id = request.user)
+			if check_option:
+				opt_buf["checked"] = True
+			else:
+				opt_buf["checked"] = False
+			data["options"].append(opt_buf)
+		return HttpResponse(json.dumps(data))
+	else:
+		return HttpResponse("Failed")
 
+@csrf_exempt
+@login_required(login_url = loginURL)
+def submit_poll(request):
+	user_id = request.session.get("id")
+	class_code = request.POST['class_code']
+	form_data = request.POST['form_data']
+	poll_id = request.POST['poll_id']
+	ism = request.POST['multiple_option']
+	poll_exist = Poll.objects.filter(id = poll_id,class_id__class_code__exact = class_code)
+	if is_class_taken(user_id,class_code) and poll_exist:
+		
+		check_attempt = OptionStudRelation.objects.filter(stud_id = user_id,option_id__poll_id__id = poll_id)
+		if not check_attempt:
+			poll_obj = Poll.objects.filter(id = poll_id).first()
+			poll_obj.attempts = poll_obj.attempts + 1
+			poll_obj.save()
+		if ism == "true":
+			# print(form_data)
+			fields = form_data.split('&')
+			powerful = OptionStudRelation.objects.filter(stud_id = user_id,option_id__poll_id__id = poll_id)
+			for ia in powerful:
+				alh = Option.objects.filter(id = ia.option_id.id).first()
+				alh.count = alh.count - 1
+				alh.save()
+			OptionStudRelation.objects.filter(stud_id = user_id,option_id__poll_id__id = poll_id).delete()
+			for vari in fields:
+				print(vari)
+				# varite = vari.split('=')
+				# for opt_id , varw in varite:							
+				opt_id , varw = vari.split('=')
+				option_object = Option.objects.get(id = opt_id)
+				som = OptionStudRelation.objects.create(option_id = option_object,stud_id = request.user)
+				option_object.count = option_object.count + 1 	
+				option_object.save()
+
+		if ism == "false" :
+			group , opt_id = form_data.split('=')
+			powerful = OptionStudRelation.objects.filter(stud_id = user_id,option_id__poll_id__id = poll_id)
+			for ia in powerful:
+				alh = Option.objects.filter(id = ia.option_id.id).first()
+				alh.count = alh.count - 1 
+				alh.save()
+			OptionStudRelation.objects.filter(stud_id = user_id,option_id__poll_id__id = poll_id).delete()
+			option_object = Option.objects.get(id = opt_id)
+			som = OptionStudRelation.objects.create(option_id = option_object ,stud_id = request.user)
+			opt_to_update = Option.objects.filter(id = som.option_id.id).first()
+			opt_to_update.count = opt_to_update.count + 1 
+			opt_to_update.save()
+		return HttpResponse("success")
+	return HttpResponse("Failed")
 @csrf_exempt
 @login_required(login_url=loginURL)
 def get_post(request):
-	print("akh")
 	user_id = request.session.get("id")
 	class_code = request.GET['class_code']
 	post_id = request.GET['post_id']
@@ -363,12 +445,9 @@ def get_post(request):
 		data["tags"] = []
 
 		topic_post = TopicPostRelation.objects.filter(post_id = post)
-		print(post.id)
 		for topic in topic_post:
 			topic_tag = topic.topic_id.name
 			data["tags"].append(topic_tag)
-			print(topic_tag)
-			print("akh")
 		for i in comments:
 			comment={}
 			comment["id"]=i.id
@@ -573,7 +652,6 @@ def add_students_to_class(request):
 				joins.stud_id = User.objects.filter(email__exact=stud_email)[0]
 				joins.time_stamp = timezone.now()
 				joins.save()
-				print("student added!")
 				return redirect('/class/'+class_code+'/settings')
 			else:
 				return HttpResponse(json.dumps({"status": "404"}))
