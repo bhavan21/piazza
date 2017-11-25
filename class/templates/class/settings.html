@@ -16,6 +16,7 @@
     <script type="text/javascript" src="{% static 'class/jquery.min.js' %}"></script>
     <!-- Materialize JS -->
     <script src="{% static 'class/materialize.min.js' %}"></script>
+    <script src="{% static 'class/canvasjs.min.js' %}"></script>
     <style>
         .class-info { width: 88% !important  }
     </style>
@@ -168,8 +169,8 @@
                   {% for i in polls %}
                       <tr>
                           <td style="font-size: 30px; color: #2bbbad">{{ i.title }}</td>
-                          <td></td>
-                          <td>0</td>
+                          <td><button data-target="modal-plot" class="btn modal-trigger" onclick="plotGraph('{{ i.title }}',{{ i.attempts }}, {{ i.optionsInfo }})">Show Graphical Representations</button></td>
+                          <td>{{ i.attempts }}</td>
                           <td>{{ i.deadline }}</td>
                       </tr>
                       {% for j in i.optionsArray %}
@@ -183,6 +184,13 @@
                   {% endfor %}
               </tbody>
           </table>
+      </div>
+      <div id="modal-plot" class="modal modal-fixed-footer class-info">
+        <div class="modal-content">
+            <div class="row" id="poll_stat_diag_cont">
+
+            </div>
+        </div>
       </div>
       <!-- Modal Trigger -->
       <button data-target="modal1" class="btn modal-trigger">Create a new Poll</button>
@@ -487,6 +495,34 @@
 
     function removePollHTML() {
         document.getElementById("poll_options").innerHTML = "";
+    }
+
+    function plotGraph(graphTitle, graphAttempts, graphOptions) {
+        var dataFound = []
+        dataFound.push({y: graphAttempts, label: "Number Of Attempts"});
+        console.log(dataFound);
+        for (var j = 0; j<graphOptions.length; j++){
+            dataFound.push({y: graphOptions[j][1], label:graphOptions[j][0]});
+        }
+        console.log(dataFound);
+        var chart = new CanvasJS.Chart("poll_stat_diag_cont",{
+            animationEnabled: true,
+            theme: "light2",
+            title:{
+                text: graphTitle
+            },
+            axisY: {
+                title: "Number of chooses"
+            },
+            data: [{
+                type: "column",
+                showInLegend: true,
+                legendMarkerColor: "grey",
+                legendText: "Different Polls",
+                dataPoints: dataFound
+            }]
+        });
+        chart.render();
     }
 
 </script>

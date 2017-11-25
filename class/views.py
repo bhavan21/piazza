@@ -457,11 +457,14 @@ def inst_settings(request, class_code):
 			options_for_poll = Option.objects.filter(poll_id=i.id)
 			poll_object = {
 				'title': i.title,
-				'deadline': i.deadline
+				'deadline': i.deadline,
+				'attempts': i.attempts,
+				'optionsInfo': []
 			}
 			options_array = []
 			for j in options_for_poll:
 				options_array.append(j)
+				poll_object['optionsInfo'].append([j.content, j.count])
 			poll_object['optionsArray'] = options_array
 			polls.append(poll_object)
 
