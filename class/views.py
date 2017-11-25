@@ -228,13 +228,19 @@ def new_post(request):
 			is_draft=False
 
 		
-		tags_fetch = request.POST['tags_select']
+		tags_fetch = request.POST.get['tags_select']
 		tags_fetch = tags_fetch.split('&')
 		post_object = Post.objects.create(class_id=class_object,posted_by=posted_by,title=title,content=content,time_stamp=time_stamp,is_anonymous=is_anonymous,is_draft=is_draft)
 		for tag in tags_fetch:
 			id_name , tag = tag.split('=')
 			topic_post = Topic.objects.get(name = tag , class_id = class_object)
 			TopicPostRelation.objects.create(topic_id = topic_post , post_id = post_object)
+
+		
+		ViewRelation.objects.create(user_id=posted_by,post_id=post_object)
+		post_object.views=post.views+1
+		post_object.save()
+
 		return HttpResponse("success")
 	else:
 		return HttpResponse("Failed")
@@ -307,7 +313,6 @@ def edit_post(request):
 @csrf_exempt
 @login_required(login_url=loginURL)
 def get_post(request):
-	print("akh")
 	user_id = request.session.get("id")
 	class_code = request.GET['class_code']
 	post_id = request.GET['post_id']
@@ -327,6 +332,7 @@ def get_post(request):
 		data["id"]=post.id
 		data["title"]=post.title
 		data["content"]=post.content
+		data["is_draft"]=post.is_draft
 		if post.is_anonymous:
 			data["posted_by"]={"name":"Anonymous User"}
 		else:

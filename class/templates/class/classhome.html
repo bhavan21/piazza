@@ -168,8 +168,8 @@
                          <ul class="collection" style="margin-top: 0px;">
                         {% for i in pins %}
                         <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
-                            <b>{{i.post.title}}</b><br>
-                            <div class="wrap item">{{i.post.content}}</div>
+                            <h6>{{i.post.title}}</h6><br>
+                            <!-- <div class="wrap item">{{i.post.content}}</div> -->
                         </li>
                    
                         {% endfor %}
@@ -184,9 +184,9 @@
                         <span>
                             <ul class="collection" style="margin-top: 0px;">
                             {% for i in drafts %}
-                            <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
-                                <b>{{i.post.title}}</b><br>
-                                <div class="wrap item">{{i.post.content}}</div>
+                            <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="loaddraft({{i.post.id}})" data-postid={{i.post.id}} >
+                                <h6 >{{i.post.title}}</h6><br>
+                                <!-- <div class="wrap item">{{i.post.content}}</div> -->
                             </li>
                             {% endfor %}
                             </ul>
@@ -201,16 +201,10 @@
             <ul class="collection" style="margin-top: 0px;">
             {% for i in posts %}
             <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
-                <b>{{i.post.title}}</b><br>
+                <h6>{{i.post.title}}</h6><br>
                 
-<!-- 
-                { % for j in {{i.tags}} % }
-                    
-                    {{j.name}}
 
-                { % endfor %}  -->
-
-                <div class="wrap item">{{i.post.content}}</div>
+                <!-- <div class="wrap item">{{i.post.content}}</div> -->
             </li>
             {% endfor %}
             </ul>
@@ -417,11 +411,15 @@
                     class_code: "{{class_code}}"
                 },
          success:function(data){
+            if(data=="Failed"){
+                alert("The post you are looking for doesn't exist");
+                var urlPath="../{{class_code}}/";
+                document.title = "ForDis";
+                window.history.replaceState({"html":"ForDis"},"", urlPath);
+            }
             var obj = JSON.parse(data);
 
-            // displaying the block to show the question/post
-            $("#new-question").css("display","none");
-            $("#post-display-block").css("display","block");
+            
 
             // Loading the question and its comments into content block
             var post_id = obj.id;
@@ -430,43 +428,126 @@
             var views=obj.views;
             var posted_by=obj.posted_by.name;
             var post_time=obj.time_stamp;
-            $("#question-title").html(title);
-            $("#question-content").html(content);
-            $("#question-views").html("views: "+views);
-            // console.log(post_time);
-            console.log($("#question-posted_by").html());
-            $("#question-posted_by").html(posted_by);
-            $("#question-time").html(post_time);
-            if(obj.can_edit_delete==0){
-                $('#edit-post-button').css("display","none");
-                $('#delete-post-button').css("display","none");
+            if(!obj.is_draft){
+
+                // displaying the block to show the question/post
+                $("#new-question").css("display","none");
+                $("#post-display-block").css("display","block");
+                
+                $("#question-title").html(title);
+                $("#question-content").html(content);
+                $("#question-views").html("views: "+views);
+                // console.log(post_time);
+                console.log($("#question-posted_by").html());
+                $("#question-posted_by").html(posted_by);
+                $("#question-time").html(post_time);
+                if(obj.can_edit_delete==0){
+                    $('#edit-post-button').css("display","none");
+                    $('#delete-post-button').css("display","none");
+                }
+                $("#post-comment").attr("data-content-postid",post_id);
+                $("#question-dispaly").attr("data-content-postid",post_id);
+                $("#comments").html("");
+                $('#tags').html("");
+
+                console.log(obj.tags);
+                $.each(obj.tags,function()
+                    { 
+                        var tag_chip = "<h3  class=\" black-text chip\">"+ this +" </h3>"
+
+                        $('#tags').append(tag_chip);
+
+                    });
+                $.each(obj.comments, function () {
+                    var comment = create_comment(this.id);
+                    $("#comments").append(comment);
+                    var comment_block = $("#comments").find("[data-commentid='" + this.id + "']");
+                    console.log(comment_block.attr("data-commentid"));
+                    $(".comment-content", comment_block).html(this.content);
+                    $(".comment-posted_by", comment_block).html(this.posted_by.name);
+                    $(".comment-time", comment_block).html(this.time_stamp);
+                    if(this.can_edit_delete==0){
+                    $('.edit-comment-button').css("display","none");
+                    $('.delete-comment-button').css("display","none");
+                }
+                 });
+                 //change the background color of the active post
+                $('.post').removeClass('active-post');
+
+            }else{
+                $("#new-question").css("display","block");
+                $("#post-display-block").css("display","none");
+                $("#post-title").val(title);
+                $("#froala-editor-newquestion").froalaEditor('html.set',content);
             }
-            $("#post-comment").attr("data-content-postid",post_id);
-            $("#question-dispaly").attr("data-content-postid",post_id);
-            $("#comments").html("");
-            $('#tags').html("");
+          
 
-            console.log(obj.tags);
-            $.each(obj.tags,function()
-                { 
-                    var tag_chip = "<h3  class=\" black-text chip\">"+ this +" </h3>"
+           
+            $(".collection").find("[data-postid='" + post_id + "']").addClass('active-post');
 
-                    $('#tags').append(tag_chip);
+            //removing the unread-post class from the clicked post if present
+            $(".collection").find("[data-postid='" + post_id + "']").removeClass('unread-post');
 
-                });
-            $.each(obj.comments, function () {
-                var comment = create_comment(this.id);
-                $("#comments").append(comment);
-                var comment_block = $("#comments").find("[data-commentid='" + this.id + "']");
-                console.log(comment_block.attr("data-commentid"));
-                $(".comment-content", comment_block).html(this.content);
-                $(".comment-posted_by", comment_block).html(this.posted_by.name);
-                $(".comment-time", comment_block).html(this.time_stamp);
-                if(this.can_edit_delete==0){
-                $('.edit-comment-button').css("display","none");
-                $('.delete-comment-button').css("display","none");
+
+             // changing the url locally to the url corresponding to the post
+            var urlPath=post_id;
+            document.title = title;
+            data_to_restore=document.body.innerHTML;
+            if(push_url){
+                 window.history.pushState({title,data_to_restore},"", urlPath);
+             }else{
+                window.history.replaceState({title,data_to_restore},"", urlPath);
+             }
+
+            // alert("Data: " + data + "\nStatus: " + status);
+        },
+
+        // if error, load the home page of the class
+        error: function(xhr, statusText){
+                // alert("The post you are looking for doesn't exist");
+                // var urlPath="../{{class_code}}/";
+                // document.title = "ForDis";
+                // window.history.pushState({"html":"ForDis"},"", urlPath);
             }
-             });
+            
+        });
+    }
+
+
+    function loaddraft(post_id,push_url=true){
+
+        cancel_editquestion();
+
+        // ajax call to load required post along with its comments
+        $.ajax({
+            type: "GET",
+            url: "/class/get_post",
+            data:{
+                    post_id: post_id,
+                    class_code: "{{class_code}}"
+                },
+         success:function(data){
+            if(data=="Failed"){
+                alert("The post you are looking for doesn't exist");
+                var urlPath="../{{class_code}}/";
+                document.title = "ForDis";
+                window.history.replaceState({"html":"ForDis"},"", urlPath);
+            }
+            var obj = JSON.parse(data);
+
+            // displaying the block to show the question/post
+            $("#new-question").css("display","block");
+            $("#post-display-block").css("display","none");
+
+            // Loading the question and its comments into content block
+            var post_id = obj.id;
+            var title=obj.title;
+            var content=obj.content;
+
+            $("#post-title").val(title);
+            $("#froala-editor-newquestion").froalaEditor('html.set',content);
+            
+            
 
             //change the background color of the active post
             $('.post').removeClass('active-post');
@@ -511,6 +592,9 @@
         $("#post-display-block").css("display","none");
         $("#new-question").css("display","block");
 
+        $("#post-title").val("");
+        $("#froala-editor-newquestion").froalaEditor('html.set',"");
+
          $('.post').removeClass('active-post');
 
         var urlPath="newpost";
@@ -528,14 +612,12 @@
     // function called when the page is loaded and postid in url is non numeric
     function redirect_to_home(show_alert=true){
         if(show_alert){
-            alert("The post you are looking for doesn't exist!");
+             alert("The post you are looking for doesn't exist");b
         }
-        var urlPath="";
+       
+        var urlPath="../{{class_code}}/";
         document.title = "ForDis";
-        var title=document.title;
-        data_to_restore=document.body.innerHTML;
-        window.history.replaceState({title,data_to_restore}, urlPath);
-        // window.location.href="../OzXE8C";
+        window.history.replaceState({"html":"ForDis"},"", urlPath);
     }
 
 
@@ -574,7 +656,7 @@
             function(data, status){
                 if(status == "success"){
                     // alert(data+ "\nsuccess");
-                    changeurl($('#question-dispaly').attr("data-content-postid"));
+                    location.reload();
                 }
             });   
     }
@@ -593,7 +675,7 @@
             function(data, status){
                 if(status == "success"){
                     // alert(data+ "\nsuccess");
-                    redirect_to_home(false);
+                    window.location.href = "/class/{{class_code}}"; 
                 }
             });   
         }
@@ -660,7 +742,7 @@
             function(data, status){
                 if(status == "success"){
                     // alert(data+ "\nsuccess");
-                    location.reload();
+                   redirect_to_home(true);
                 }
             });   
         }
@@ -750,6 +832,7 @@
                 content: $('#froala-editor-newquestion').froalaEditor('html.get'),
                 class_code: "{{class_code}}",
                 is_anonymous:$('#post-is-anonymous').val(),
+                tags_select : $('#tags_select').serialize(),
                 is_draft:"1"
             },
             function(data, status){
@@ -772,7 +855,8 @@
                 date:$('#schedule-date').val(),
                 time:$('#schedule-time').val(),
                 class_code: "{{class_code}}",
-                is_anonymous:$('#post-is-anonymous').val()
+                is_anonymous:$('#post-is-anonymous').val(),
+                tags_select : $('#tags_select').serialize()
             },
             function(data, status){
                 if(status == "success"){
