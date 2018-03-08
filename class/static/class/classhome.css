@@ -4,10 +4,10 @@
 #sidebar{
     border-right: 2px solid #000000;
     position: absolute;
-    top:12%;
+    top:10%;
     left:0;
     width: 28%;
-    height: 88%;
+    height: 90%;
     overflow-y: auto;
 
 }
@@ -23,12 +23,20 @@
 }
 .post:hover{
     cursor: pointer;
-    background-color: #F5E5C0;
+    background-color: #fcf6e9;
 }
 #search-icon {
     float: right;
-    margin-right: 15px;
-    margin-top: -38px;
+    margin-right: 8px;
+    margin-top: -45px;
+    position: relative;
+    z-index: 2;
+    color: green;
+}
+#close-icon {
+    float: right;
+    margin-right: 8px;
+    margin-top: -45px;
     position: relative;
     z-index: 2;
     color: green;
@@ -49,3 +57,13 @@
     color: white;
     padding: 3px;
 }
+
+.active-post{
+    background: #f5e4bd !important;
+}
+
+.unread-post{
+    color:#0099cc;
+}
+
+

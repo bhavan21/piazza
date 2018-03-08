@@ -4,101 +4,1142 @@
 <head>
 	<title>ForDis</title>
     <meta charset="utf-8">
+
+    <!-- The following line tell browser that the page is mobile friendly -->
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0"/>
-	<link rel="stylesheet" href="{% static 'class/materialize.min.css' %}" type="text/css" >
+
+    <!-- Materialize css and materialize icons -->
+    <link rel="stylesheet" href="{% static 'class/materialize.min.css' %}" type="text/css" >
     <link rel="stylesheet" href="{% static 'class/iconFamilyMaterialIcons.css' %}" type="text/css" >
+
+    <!-- Rich text editor css files -->
     <link rel="stylesheet" href="{% static 'class/font-awesome.min.css' %}" type="text/css" />
     <link rel="stylesheet" href="{% static 'class/codemirror.min.css' %}" type="text/css" >
     <link rel="stylesheet" href="{% static 'class/froala_editor.pkgd.min.css' %}"  type="text/css" />
     <link rel="stylesheet" href="{% static 'class/froala_style.min.css' %}" type="text/css" />
+
+    <!-- Date-time picker css -->
+    <link rel="stylesheet" href="{% static 'class/material-datetime-picker.css' %}">
+
+    <!-- Custom css file -->
     <link rel="stylesheet" href="{% static 'class/classhome.css' %}" type="text/css"/>
 
-	<script src="{% static 'class/materialize.min.js' %}"></script>
+   
+    <style type="text/css">
+        .c-datepicker{z-index: 99 !important};
+    </style>
+
+    <style type="text/css">
+        .wrap{
+            word-wrap: break-word;
+            white-space: wrap;
+        }
+        .button-background-remove{
+            background: Transparent;
+            outline: none;
+            border: none;
+            cursor:pointer;
+            overflow: hidden;
+        }
+        .button-background-remove :click{
+            background: Transparent;
+            outline: none;
+            border: none;
+            cursor:pointer;
+            overflow: hidden;
+        }
+    </style>
+
+    <!-- Jquery Library-->
+    <script type="text/javascript" src="{% static 'class/jquery.min.js' %}"></script>
+
+    <!-- Script for showing 100 characters at maximum for description of a post in sidebar -->
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var showChar = 100;
+            var ellipsestext = "...";
+            $('.item').each(function() {
+                
+                var content = $(this).html();
+                // var tmp = document.createElement("DIV");
+                // tmp.innerHTML = content;
+                // content=tmp.textContent || tmp.innerText || "";
+                if(content.length > showChar) {
+                    // console.log($(this).html());
+                    var c = content.substr(0, showChar);
+                    var h = content.substr(showChar, content.length - showChar);
+
+                    var html = c ;
+                    
+                    html=html+ ellipsestext;
+
+                    $(this).html(html);
+                }
+            });
+        });
+    </script>
 
 </head>
 
 <body>
 
+    {{error}}
+
+    <!-- Navigation bar -->
    <nav class="light-blue lighten-1" role="navigation">
-    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">For'Dis</a>
-        <ul class="right hide-on-med-and-down">
-            <li><a href="/class">My Classes</a></li>
-            <li><a href="logout">Logout</a></li>
+        <div class="nav-wrapper container"><a id="logo-container" href="/class" class="brand-logo">For'Dis</a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="/class">My Classes</a></li>
+                <li><a href="/class/logout">Logout</a></li>
+            </ul>
+
+            <ul id="nav-mobile" class="side-nav">
+                <li><a href="/class">My Classes</a></li>
+                <li><a href="/class/logout">Logout</a></li>
+            </ul>
+            <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+        </div>
+    </nav>
+
+    <!-- Side bar -->
+    <div  id="sidebar">
+
+<!--         <p>
+            for reference
+        {% for i in all_tags %}
+            {{i}} = 
+        {% endfor %}
+        </p>
+ -->
+
+       
+
+
+ <div class="row">
+    <div class="col s12">
+      <ul class="tabs">
+        <li class="tab col s5"><a href="#post_section">Posts</a></li>
+        <li class="tab col s5"><a href="#poll_section">Polls</a></li>
+      </ul>
+    </div>
+    <div id="poll_section" class="col s12">
+
+
+
+        <ul class="collection" style="margin-top: 0px;">
+
+            {% for i in polls %}
+
+            <li class="collection-item post 
+            {% if not i.vote %}
+            unread-post
+            {% endif %}
+            "
+             onclick= "changeurlpoll({{i.poll.id}})" >
+                <b>{{i.poll.title}}</b><br>
+                
+            </li>
+
+
+            {% endfor %}
         </ul>
 
-        <ul id="nav-mobile" class="side-nav">
-            <li><a href="/class">My Classes</a></li>
-            <li><a href="logout">Logout</a></li>
-     </ul>
-     <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
- </div>
-</nav>
-
- <!-- <div class="card-panel teal lighten-2">This is a card panel with a teal lighten-2 class</div> -->
-
-<!-- <div style="background-color:grey;padding: 3px; ">
-    <div class="chip">lab1</div>
-    <div class="chip">lab1</div>
-    <div class="chip">lab1</div>
-    <div class="chip">lab1</div>
-</div> -->
-
-
-<div  id="sidebar">
-
-    <button id=newpost><span style="font-size: 14px;display: inline-block;">New Post</span></button>
-
-
-    <input id="search-box"  placeholder="Search..."  name="search"/>
-    <a href="#"><i id="search-icon" class="small material-icons">search</i></a>
 
 
 
-    <ul class="collection" style="margin-top: 0px;">
-    {% for i in "123456789" %}
-    <li class="collection-item post" onclick="changeurl({{i}})">
-        <b>Heading</b><br>
-        Description Description Description Description. Description...
-    </li>
-    {% endfor %}
-    </ul>
     </div>
-<div class="col s8" id="content">
-    <h3>What is a question?</h3>
-    <p>A question is a linguistic expression used to make a request for information, or the request made using such an expression. The information requested is provided in the form of an answer.<br><br>Questions have developed a range of uses that go beyond the simple eliciting of information from another party. Rhetorical questions, for example, are used to make a point, and are not expected to be answered. Many languages have special grammatical forms for questions (for example, in the English sentence "Are you happy?", the inversion of the subject you and the verb are shows it to be a question rather than a statement). However, questions can also be asked without using these interrogative grammatical structures – for example one may use an imperative, as in "Tell me your name".</p>
 
-    <h5>Join the discusion</h5>
-   <!--  <div class="row" >
-        <div class="input-field col s12">
-          <input name="comment" type="text" placeholder="Comment" class="validate">
-        </div>
-      </div> -->
+    
+    <div id="post_section" class="col s12">
 
-    <textarea id="froala-editor"></textarea>
+<!-- Dropdown Trigger -->
+    <button class='dropdown-button btn col s12' data-activates='dropdown1'>Choose tag</button>
+
+    <!-- Dropdown Structure -->
+    <ul id='dropdown1' class='dropdown-content'>
+        {% for i in all_tags %}
+            <li onclick="tagfunction('{{i}}')">{{i}}</li>
+        {% endfor %}
+    </ul>
+        <!-- New post button -->
+        <button id=newpost onclick="newpost_page()"><span style="font-size: 14px;display: inline-block;">New Post</span></button>
+
+        <!-- Search bar -->
+        <input id="search-box"  placeholder="Search..."  name="search">
+        <button id="search-icon" style="display: inline-block;"><i class="small material-icons">search</i></button>
+        <button id="close-icon" style="display: none;"><i class="small material-icons">close</i></button>
+
+
+            <ul class="collapsible" data-collapsible="accordion">
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">local_offer</i>Pins</div>
+                    <div class="collapsible-body" style="padding: 0px;">
+                        <span>
+                         <ul class="collection" style="margin-top: 0px;">
+                        {% for i in pins %}
+                        <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
+                            <h6>{{i.post.title}}</h6><br>
+                            <!-- <div class="wrap item">{{i.post.content}}</div> -->
+                        </li>
+                   
+                        {% endfor %}
+                        </ul>
+
+                        </span>
+                    </div>
+                </li>
+                <li>
+                  <div class="collapsible-header"><i class="material-icons">drafts</i>Drafts</div>
+                    <div class="collapsible-body" style="padding: 0px;">
+                        <span>
+                            <ul class="collection" style="margin-top: 0px;">
+                            {% for i in drafts %}
+                            <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}} >
+                                <h6 >{{i.post.title}}</h6><br>
+                                <!-- <div class="wrap item">{{i.post.content}}</div> -->
+                            </li>
+                            {% endfor %}
+                            </ul>
+
+                        </span>
+                    </div>
+                </li>
+            </ul>
+
+
+
+            <ul id="allposts" class="collection" style="margin-top: 0px;">
+            {% for i in posts %}
+            <li class="collection-item post {% if not i.seen %}unread-post{% endif %}" onclick="changeurl({{i.post.id}})" data-postid={{i.post.id}}>
+                <h6>{{i.post.title}}</h6><br>
+                
+
+                <!-- <div class="wrap item">{{i.post.content}}</div> -->
+            </li>
+            {% endfor %}
+            </ul>
+            <div id="fetchedposts" style="display: none;"></div>
+        </ul>
+    </div>
+  
+
+  </div>
 
 </div>
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/codemirror.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/mode/xml/xml.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/froala-editor/2.6.0//js/froala_editor.pkgd.min.js"></script>
+    <!-- Content -->
+    <div id="content" style="padding-bottom: 50px;">
+
+        <div id="poll-display-block" style="display : none ;">
+                    <div class="col s9">
+                        <h3 id="poll-title"></h3>
+                    </div> 
+                    
+
+                    
+                <div class="row">
+                    <div class="col s6"> </div>
+                    <div class="col s3">Post Time: <br><span id="poll-time">25th July</span></div>
+                    <div class="col s3">Post Deadline: <br><span id="poll-deadline">25th July</span> </div>
+                </div>
+
+                    <div id="poll-options">
+                        
+                    </div>
+
+                    <button id="vote-button" style="display: hidden" type="button" class="btn waves-effect waves-light">Vote<i class="material-icons right">send</i></button>
+        </div>
+
+
+
+
+        <!-- Block for showing a question/post (Initially display none) -->
+        <div id="post-display-block" style="display: none;">
+
+
+
+            <!-- Question/post -->
+            <div id="question-dispaly">
+                <div class="row">
+                    <div class="col s9">
+                        <h3 id="question-title"></h3>
+                    </div>
+                    <div class="col s3">
+                        <h3 id="question-views" class="chip"></h3><br>
+                        <button id="pin-post-button" class="button-background-remove" onclick="pin_question()"><i class="material-icons small" style="color: green;">local_offer</i></button>
+                        <button id="edit-post-button" class="button-background-remove" onclick="edit_question()"><i class="material-icons small" style="color: green;">edit</i></button>
+                        <button id="delete-post-button" class="button-background-remove" onclick="delete_question()"><i class="material-icons small" style="color: red;">delete</i></button>
+                    </div>
+
+                </div>
+                <div class="col s5" id = "tags">
+                    
+                </div>
+
+                <div id="question-content" class="wrap"></div><br>
+                <div style="float: right;clear:both;margin-right:20px;">
+                    <a id="question-posted_by" style="margin-right: 20px;">Bhavan Turak</a><span id="question-time">25th July</span>
+                </div>
+                
+                
+            </div>
+
+            <div id="question-edit"  style="display: none">
+                <h6>Summary:</h6>
+                <input type="text" id="edit-title" name="title" style="padding-left: 10px; border:1px solid #000000" />
+                <h6>Details:</h6>
+                <textarea id="froala-editor-editquestion" name="des"></textarea>
+
+                <div class="center-align vertical-align" style="margin: 10px;">
+                    <button id="save-edit-question" type="button" onclick="save_editquestion()" class="btn waves-effect waves-light">save<i class="material-icons right">send</i></button>
+
+                    <!-- Button to post the question as a draft -->
+                    <button id="cancel-edit-question" type="button" onclick="cancel_editquestion()" class="btn waves-effect waves-light">Cancel</button>
+
+                </div>  
+
+            </div>
+
+
+
+            <!-- Comments for the Post -->
+            <h5>Comments</h5>
+            <!-- Comments will be loaded into this div element -->
+            <div id="comments"></div>
+
+            <!-- Text editor to post a new comment -->
+            <h5>Join the discusion</h5>
+            <textarea id="froala-editor-comment" name="des"></textarea>
+
+
+            <div class="row">
+            <div class="input-field col s4" >
+                <select id="comment-is-anonymous">
+                <option value="0" selected="">{{user_id.first_name}} {{user_id.last_name}}</option>
+                    <option value="1">Anonymous</option>
+                </select>
+                <label>Post as: </label>
+            </div>
+             <div class="col s4"></div>
+
+            <!-- Post comment button -->
+            <div class="col s4">
+            <button id="post-comment" data-content-postid="" type="button" style="float: right;margin: 25px;" class="btn waves-effect waves-light" >Comment<i class="material-icons right">send</i></button>
+            </div>
+
+             </div>
+
+        </div>
+        <!-- Block for showing a question/post ends -->
+
+        <!-- div to post a new post (display is initially none)-->
+        <div id="new-question" style="display: none;">
+            <h5>Post a question
+
+
+
+            </h5>
+            <!-- This form is being submitted by Jquery -->
+            <form id="new-question-form">
+
+                <!-- Title of the post-->
+                <h6>Summary:</h6>
+                <input type="text" id="post-title" name="title" style="padding-left: 10px; border:1px solid #000000" />
+
+
+
+                  <div class="input-field col s5">
+                    <select multiple id="tags_select" name = "tags_select">
+                      <option value="" disabled selected>Choose Tags</option>
+                      
+                      <!-- <option value="1">Option 1</option>
+                      <option value="2">Option 2</option>
+                      <option value="3">Option 3</option>
+                 -->
+
+        {% for i in all_tags %}
+             
+          <option value="{{i}}">{{i}}</option>
+                    
+        {% endfor %}
+
+                    </select>
+                    <label>Topic Tag</label>
+                  </div>
+
+                <!-- Content of the post-->
+                <h6>Details:</h6>
+                <textarea id="froala-editor-newquestion" name="des"></textarea>
+
+
+                <div class="row" style="padding-top: 10px;">
+                    <div class="input-field col s3">
+                        <select id="post-is-anonymous">
+                        <option value="0" selected="">{{user_id.first_name}} {{user_id.last_name}}</option>
+                            <option value="1">Anonymous</option>
+                        </select>
+                        <label>Post as: </label>
+                    </div>
+                    <div class="col s3">
+                         <label>Date: </label>
+                        <input id="schedule-date" type="text" class="datepicker">
+                    </div>
+                    <div class="col s3">
+                        <label>Time: </label>
+                        <input id=schedule-time type="text" class="timepicker">
+                    </div><br>
+
+
+                <div class="center-align vertical-align" style="margin: 10px;">
+                    <!-- <a class="c-datepicker-btn">
+                        <span class="material-icon">Open date picker</span>
+                    </a>
+                    <pre id="output"></pre> -->
+
+                   <!-- Button to post the question -->
+                    <button id="post-question" type="button" class="btn waves-effect waves-light">Post My question Now<i class="material-icons right">send</i></button>
+
+                    <!-- Button to post the question as a draft -->
+                    <button id="post-draft" type="button" class="btn waves-effect waves-light">Save as Draft<i class="material-icons right">drafts</i></button>
+
+                     <!-- Button to schedule a post -->
+                    <button  id="schedule-post" type="button" class="btn waves-effect waves-light">Schedule my Post<i class="material-icons right">schedule</i></button>
+                </div>
+            </form>
+        </div>
+        <!-- div to post a new post ends -->
+
+    </div>
+    <!-- Content ends -->
+
+<!-- Materialize JS -->
+<script src="{% static 'class/materialize.min.js' %}"></script>
+
+<!-- Rich text editor JS -->
+<script type="text/javascript" src="{% static 'class/codemirror.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'class/xml.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'class/froala_editor.pkgd.min.js' %}"></script>
+
+<!-- Date-time picker JS -->
+<script src="{% static 'class/rome.js' %}"></script>
+<script src="{% static 'class/moment.js' %}"></script>
+<script src="{% static 'class/material-datetime-picker.js' %}" charset="utf-8"></script>
 
 <script type="text/javascript">
- function changeurl(i) {
-    var title="title";
-    var content="content of question "+i;
-    var urlPath="hi"+i
-    document.getElementById("content").innerHTML = content;
-    document.title = title;
-    window.history.pushState({"html":content,title},"", urlPath);
-}
-window.onpopstate = function(e){
-    if(e.state){
-        document.getElementById("content").innerHTML = e.state.html;
-        document.title = e.state.pageTitle;
+
+
+    function create_comment(commentid){
+        return  '<div class="comment-block" data-commentid="'+commentid+'"> <div class="comment-dispaly" style="background:#F5E5C0;padding:25px;padding-left:15px;margin:10px;"> <div class="row"> <div class="col s10"> <div class="wrap comment-content"></div> </div> <div class="col s2"> <button class="edit-comment-button" class="button-background-remove" onclick="edit_comment('+commentid+')"><i class="material-icons small" style="color: green;">edit</i></button> <button class="delete-comment-button" class="button-background-remove" onclick="delete_comment('+commentid+')"><i class="material-icons small" style="color: red;">delete</i></button> </div> </div> <div style="float: right;clear:both;margin-right:20px;"> <a class="comment-posted_by" style="margin-right: 20px;">Name</a><span class="comment-time">Time</span> </div> </div> <div class="comment-edit" style="display: none"> <textarea class="froala-editor-editcomment" name="des"></textarea> <div class="center-align vertical-align" style="margin: 10px;"> <button class="save-edit-question" type="button" onclick="save_editcomment('+commentid+')" class="btn waves-effect waves-light">save<i class="material-icons right">send</i></button> <button class="cancel-edit-question" type="button" onclick="cancel_editcomment('+commentid+')" class="btn waves-effect waves-light">Cancel</button> </div> </div> </div>'
     }
-};
-$(function() {
-  $('textarea#froala-editor').froalaEditor()
+
+    // this function is called when a post in side bar is clicked or when url has a numeric postid
+     function  changeurlpoll(poll_id,push_url = true)
+     {
+        $.ajax(
+        {
+            type : "GET",
+            url : "/class/get_poll" ,
+            data : 
+            {
+                poll_id : poll_id ,
+                class_code : "{{class_code}}"
+            },
+            success:function(data) 
+            {
+
+
+            var json_obj = JSON.parse(data);           
+            $("#new-question").css("display","none");
+            $("#post-display-block").css("display","none");
+            $("#poll-display-block").css("display","block");
+            
+            $("#poll-title").html(json_obj.title);
+            $("#poll-time").html(json_obj.time_stamp);
+            $("#poll-deadline").html(json_obj.deadline);
+            
+            $("#poll-options").html("");
+
+
+
+            var truel = json_obj.is_ins ;
+
+
+            // truel = false;
+
+            if(truel)
+            {
+
+                var results = "<h3> Results -->"+ json_obj.attempts  +"Attempts</h3>"
+                $('#poll-options').append(results);
+
+                for (var i = 0; i < json_obj.options.length; i++)
+                 {
+                    var counter = "<h5  class=\" black-text \">"+ json_obj.options[i].option_name + " --->"  +json_obj.options[i].option_count +" Votes </h5> <br>" ;
+                    $('#poll-options').append(counter);       
+                 }
+                 $('#vote-button').hide();
+            }
+
+            else
+               {
+
+                if(json_obj.is_multi)
+                {
+
+
+                    poll_id_to_send = json_obj.id ; 
+                    ism  = true ;
+
+                var select_options =  '<h6> Select One or More Options </h6> <form id = "multiple_option">  ' ;
+
+                    // select_options = select_options + '<input type="hidden" value = "'+ json_obj.id+'" name = "poll_id" />' ;
+                    for ( var i = 0 ; i < json_obj.options.length; i++)
+                    {
+                        var sl = json_obj.options[i] ;
+
+                        var opt =  '<p> <input type ="checkbox"' ;
+                        if(sl.checked)
+                        {
+                            opt = opt + ' checked = "checked" ' ;
+                        }
+                   opt = opt + 'name ="'+ sl.option_id +'" '  +' id="' + sl.option_id + '" class = "filled-in" />      <label for="'+sl.option_id+'">'+ sl.option_name+'</label> </p>' ;
+                        select_options = select_options + opt ; 
+                    }
+
+
+                
+                // select_options = select_options + '<input type="hidden" value = "multiple" name = "ism" />';
+
+                    select_options = select_options + ' </form>  ' ;
+
+
+
+                    $("#poll-options").append(select_options);
+                    
+                    $("#vote-button").show();
+
+                }
+                else
+                {
+
+                    poll_id_to_send = json_obj.id;
+                    ism = false ;
+
+                var select_options =  '<h6> Select One  Option Among these </h6> <form id = "multiple_option">  ' ;
+
+                    // select_options = select_options + '<input type="hidden" value = "'+ json_obj.id+'" name = "poll_id" />' ;                 
+                    for ( var i = 0 ; i < json_obj.options.length; i++)
+                    {
+                        var sl = json_obj.options[i] ;
+
+                        var opt =  '<p> <input name = "group1" type ="radio"' ;
+                        if(sl.checked)
+                        {
+                            opt = opt + ' checked = "checked" ' ;
+                        }
+                   opt = opt + 'value = "' + sl.option_id +  '" id="' + sl.option_id + '" class = "filled-in" />      <label for="'+sl.option_id+'">'+ sl.option_name+'</label> </p>' ;
+                        select_options = select_options + opt ; 
+                    }
+
+                // select_options = select_options + '<input type="hidden" value = "single" name = "ism" />';
+
+
+                    select_options = select_options + ' </form>  ' ;
+
+
+
+                    $("#poll-options").append(select_options);
+                    
+                    $("#vote-button").show();
+                
+                }
+
+                   
+               } 
+
+            }
+
+        }
+            );
+ 
+     }
+
+    function changeurl(post_id,push_url=true) {
+
+        cancel_editquestion();
+
+        // ajax call to load required post along with its comments
+        $.ajax({
+            type: "GET",
+            url: "/class/get_post",
+            data:{
+                    post_id: post_id,
+                    class_code: "{{class_code}}"
+                },
+         success:function(data){
+            if(data=="Failed"){
+                alert("The post you are looking for doesn't exist");
+                var urlPath="../{{class_code}}/";
+                document.title = "ForDis";
+                window.history.replaceState({"html":"ForDis"},"", urlPath);
+            }
+            var obj = JSON.parse(data);
+
+            // displaying the block to show the question/post
+            $("#poll-display-block").css("display","none");
+
+            // Loading the question and its comments into content block
+            var post_id = obj.id;
+            var title=obj.title;
+            var content=obj.content;
+            var views=obj.views;
+            var posted_by=obj.posted_by.name;
+            var post_time=obj.time_stamp;
+            if(!obj.is_draft){
+
+                // displaying the block to show the question/post
+                $("#new-question").css("display","none");
+                $("#post-display-block").css("display","block");
+                
+                $("#question-title").html(title);
+                $("#question-content").html(content);
+                $("#question-views").html("views: "+views);
+                // console.log(post_time);
+                console.log($("#question-posted_by").html());
+                $("#question-posted_by").html(posted_by);
+                $("#question-time").html(post_time);
+                if(obj.can_edit_delete==0){
+                    $('#edit-post-button').css("display","none");
+                    $('#delete-post-button').css("display","none");
+                }
+                $("#post-comment").attr("data-content-postid",post_id);
+                $("#question-dispaly").attr("data-content-postid",post_id);
+                $("#comments").html("");
+                $('#tags').html("");
+
+                console.log(obj.tags);
+                $.each(obj.tags,function()
+                    { 
+                        var tag_chip = "<h3  class=\" black-text chip\">"+ this +" </h3>"
+
+                        $('#tags').append(tag_chip);
+
+                    });
+                $.each(obj.comments, function () {
+                    var comment = create_comment(this.id);
+                    $("#comments").append(comment);
+                    var comment_block = $("#comments").find("[data-commentid='" + this.id + "']");
+                    console.log(comment_block.attr("data-commentid"));
+                    $(".comment-content", comment_block).html(this.content);
+                    $(".comment-posted_by", comment_block).html(this.posted_by.name);
+                    $(".comment-time", comment_block).html(this.time_stamp);
+                    if(this.can_edit_delete==0){
+                    $('.edit-comment-button').css("display","none");
+                    $('.delete-comment-button').css("display","none");
+                }
+                 });
+                 //change the background color of the active post
+                $('.post').removeClass('active-post');
+
+            }else{
+                $("#new-question").css("display","block");
+                $("#post-display-block").css("display","none");
+                $("#post-title").val(title);
+                $("#froala-editor-newquestion").froalaEditor('html.set',content);
+            }
+          
+
+           
+            $(".collection").find("[data-postid='" + post_id + "']").addClass('active-post');
+
+            //removing the unread-post class from the clicked post if present
+            $(".collection").find("[data-postid='" + post_id + "']").removeClass('unread-post');
+
+
+             // changing the url locally to the url corresponding to the post
+            var urlPath=post_id;
+            document.title = title;
+            data_to_restore=document.body.innerHTML;
+            if(push_url){
+                 window.history.pushState({title,data_to_restore},"", urlPath);
+             }else{
+                window.history.replaceState({title,data_to_restore},"", urlPath);
+             }
+
+            // alert("Data: " + data + "\nStatus: " + status);
+        },
+
+        // if error, load the home page of the class
+        error: function(xhr, statusText){
+                // alert("The post you are looking for doesn't exist");
+                // var urlPath="../{{class_code}}/";
+                // document.title = "ForDis";
+                // window.history.pushState({"html":"ForDis"},"", urlPath);
+            }
+            
+        });
+    }
+
+
+
+
+
+
+// this function is called when newpost button is clicked
+    function newpost_page(push_url=true){
+
+        cancel_editquestion();
+        console.log("called");
+
+        $("#post-display-block").css("display","none");
+        $("#poll-display-block").css("display","none");
+        $("#new-question").css("display","block");
+
+        $("#post-title").val("");
+        $("#froala-editor-newquestion").froalaEditor('html.set',"");
+
+         $('.post').removeClass('active-post');
+
+        var urlPath="newpost";
+        document.title = "New Post";
+        var title=document.title;
+        data_to_restore=document.body.innerHTML;
+        if(push_url){
+             window.history.pushState({title,data_to_restore},"", urlPath);
+         }else{
+            window.history.replaceState({title,data_to_restore},"", urlPath);
+         }
+        
+    };
+
+    // function called when the page is loaded and postid in url is non numeric
+    function redirect_to_home(show_alert=true){
+        if(show_alert){
+             alert("The post you are looking for doesn't exist");b
+        }
+       
+        var urlPath="../{{class_code}}/";
+        document.title = "ForDis";
+        window.history.replaceState({"html":"ForDis"},"", urlPath);
+    }
+
+
+    // function to add locally changed urls to browser stack(for navigating pages in a tab)
+    window.onpopstate = function(e){
+        if(e.state){
+            // console.log("Fired");
+            console.log(e.state)
+            document.body.innerHTML = e.state.data_to_restore;
+            document.title = e.state.title;
+        }
+    };
+
+
+    function edit_question(){
+        console.log("called");
+        $("#question-dispaly").css("display","none");
+        var title= $('#question-title').html();
+        // console.log(title);
+        var des=$("#question-dispaly > #question-content").html();
+        $('#question-edit > #edit-title').val(title);
+        $('#question-edit > #froala-editor-editquestion').froalaEditor();
+        $('#question-edit > #froala-editor-editquestion').froalaEditor('html.set',des);
+        $('#question-edit').css("display","block");
+    }
+
+    function save_editquestion(){
+        // console.log($('question-dispaly').attr("data-content-postid"));
+         $.post("/class/edit_post",
+            {
+                post_id: $('#question-dispaly').attr("data-content-postid"),
+                title: $('#edit-title').val(),
+                content: $('#froala-editor-editquestion').froalaEditor('html.get'),
+                class_code: "{{class_code}}"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                    location.reload();
+                }
+            });   
+    }
+    function cancel_editquestion(){
+        $('#question-edit').css("display","none");
+        $("#question-dispaly").css("display","block");
+    }
+
+    function delete_question(){
+        if(confirm("Are you sure to delete the post?")){
+            $.post("/class/delete_post",
+            {
+                post_id: $('#question-dispaly').attr("data-content-postid"),
+                class_code: "{{class_code}}"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                    window.location.href = "/class/{{class_code}}"; 
+                }
+            });   
+        }
+        
+    }
+
+    function pin_question(){
+        if(confirm("Do you want to pin this post?")){
+            $.post("/class/pin_post",
+            {
+                post_id: $('#question-dispaly').attr("data-content-postid"),
+                class_code: "{{class_code}}"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                   location.reload();
+                }
+            });   
+        }
+        
+    }
+
+     function edit_comment(commentid){
+        var comment_block = $("#comments").find("[data-commentid='" + commentid + "']");
+        $(".comment-dispaly", comment_block).css("display","none");
+        var  content=$(".comment-content", comment_block).html();
+        console.log(content);
+        $(".froala-editor-editcomment", comment_block).froalaEditor();
+        $(".froala-editor-editcomment", comment_block).froalaEditor('html.set',content);
+        $(".comment-edit", comment_block).css("display","block");
+    }
+
+    function save_editcomment(commentid){
+        var comment_block = $("#comments").find("[data-commentid='" + commentid + "']");
+         $.post("/class/edit_comment",
+            {
+                post_id: $('#question-dispaly').attr("data-content-postid"),
+                comment_id: commentid,
+                content: $(".froala-editor-editcomment", comment_block).froalaEditor('html.get'),
+                class_code: "{{class_code}}"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                    changeurl($('#question-dispaly').attr("data-content-postid"));
+                }
+            });   
+    }
+    function cancel_editcomment(commentid){
+        var comment_block = $("#comments").find("[data-commentid='" + commentid + "']");
+        $(".comment-edit", comment_block).css("display","none");
+        $(".comment-dispaly", comment_block).css("display","block");
+    }
+
+
+    function tagfunction(tagname){
+        tagname = tagname.replace('+', ' ');
+        // tagname.replace(/+/g,' ');
+        $.get("/class/tagposts",
+        {
+            class_code: "{{class_code}}",
+            tagname: tagname      
+        },
+        function(data, status){
+            if(status == "success"){
+                var obj = JSON.parse(data);
+                $("#fetchedposts").empty();
+                var ul_class = document.createElement('ul');
+                ul_class.className = "collection";
+                var post;
+                // $("#fetchedposts").append("<ul class=\"collection\" style=\"margin-top: 0px;\">");
+                $.each(obj.fetchedposts, function(){
+                    post = document.createElement('li');
+                    post.classList.add("collection-item");
+                    post.classList.add("post");
+                    if(!this.seen){
+                        post.classList.add("unread-post");
+                    }
+                    var id = this.id;
+                    (function(value){
+                        post.addEventListener("click", function(){
+                            changeurl(value);   
+                        }, false);})(id)
+                    post.innerHTML = this.title;
+                    
+                    // var post = "<li class=\"collection-item post {% if not "+this.seen+" %}unread-post{% endif %}\" onclick=\"changeurl("+this.id+")\" data-postid="+this.id+">"+this.title+"</li>";
+                    ul_class.appendChild(post);
+                });
+                // $("fetchedposts").append("</ul>");
+                $("#fetchedposts").append(ul_class);
+                $("#fetchedposts").css("display","block");
+                $("#allposts").css('display','none');
+                $("#search-icon").css("display","none")
+                $("#close-icon").css("display","block")            
+            }
+        });
+    }    
+
+    function delete_comment(commentid){
+        if(confirm("Are you sure to delete this comment?")){
+            $.post("/class/delete_comment",
+            {
+                post_id: $('#question-dispaly').attr("data-content-postid"),
+                comment_id: commentid,
+                class_code: "{{class_code}}"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                   changeurl($('#question-dispaly').attr("data-content-postid"));
+                }
+            });   
+        }
+        
+    }
+
+
+    // loading the rich text editors on page load
+    $(function() {
+        $('select').material_select();
+        $('.datepicker').pickadate({
+            selectMonths: true, // Creates a dropdown to control month
+            selectYears: 15, // Creates a dropdown of 15 years to control year,
+            today: 'Today',
+            clear: 'Clear',
+            close: 'Ok',
+            closeOnSelect: false // Close upon selecting a date,
+          });
+        $('.timepicker').pickatime({
+            default: 'now', // Set default time: 'now', '1:30AM', '16:30'
+            fromnow: 0,       // set default time to * milliseconds from now (using with default = 'now')
+            twelvehour: true, // Use AM/PM or 24-hour format
+            donetext: 'OK', // text for done-button
+            cleartext: 'Clear', // text for clear-button
+            canceltext: 'Cancel', // Text for cancel-button
+            autoclose: false, // automatic close timepicker
+            ampmclickable: true, // make AM PM clickable
+            aftershow: function(){} //Function for after opening timepicker
+          });
+        $('textarea#froala-editor-newquestion').froalaEditor();
+        $('textarea#froala-editor-comment').froalaEditor()
+
+    });
+
+
+
+
+
+    $( document ).ready(function(){
+
+
+        poll_id_to_send = 12 ;
+        ism = false ;
+
+         // parsing the url on pageload and displaying the appropriate post in content block
+        var urlparse = window.location.pathname.split("/");
+        // alert(urlparse[3]);
+        tail=urlparse[3];
+        if(tail == "poll")
+        {
+            if($.isNumeric(urlparse[4]))
+            {
+                changeurlpoll(urlparse[4],false);
+            }
+            else
+                redirect_to_home();
+        }
+        if(tail=="newpost"){
+            newpost_page(false);
+        }else if($.isNumeric(tail)){
+            changeurl(tail,false);
+        }else if(tail!=""){
+            redirect_to_home();
+        }else{
+             var urlPath="";
+            document.title = "ForDis";
+            var title=document.title;
+            data_to_restore=document.body.innerHTML;
+            window.history.replaceState({title,data_to_restore}, urlPath);
+        }
+
+        // function to post a new post
+        $("#post-question").click(function(){
+            $("#post-question").prop('disabled',true);
+            $.post("/class/new_post",
+            {
+                title: $('#post-title').val(),
+                content: $('#froala-editor-newquestion').froalaEditor('html.get'),
+
+                class_code: "{{class_code}}",
+                is_anonymous:$('#post-is-anonymous').val(),
+                tags_select : $('#tags_select').serialize()
+
+            },
+            function(data, status){
+                if(status == "success"){
+                    location.reload();
+                    // alert(data+ "\nsuccess");
+                }
+                $("#post-question").prop('disabled',false);
+            });   
+        });
+
+         // function to post a new post
+        $("#post-draft").click(function(){
+            $("#post-draft").prop('disabled',true);
+            $.post("/class/new_post",
+            {
+                title: $('#post-title').val(),
+                content: $('#froala-editor-newquestion').froalaEditor('html.get'),
+                class_code: "{{class_code}}",
+                is_anonymous:$('#post-is-anonymous').val(),
+                tags_select : $('#tags_select').serialize(),
+                is_draft:"1"
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                    location.reload();
+                }
+                $("#post-draft").prop('disabled',false);
+            });   
+        });
+
+        $("#vote-button").click(function()
+            {
+                $.post("/class/submit_poll" ,
+                
+                {
+                    class_code: "{{class_code}}",
+                    form_data : $('#multiple_option').serialize() ,
+                    poll_id  : poll_id_to_send ,
+                    multiple_option : ism 
+                } , 
+                function(data,status)
+                {
+                    if(status == "success")
+                    {
+                        Materialize.toast("Successfully Voted" , 4000);
+                    }
+                }
+                    );
+                
+                
+
+            }
+
+            );
+
+         // function to schedule post
+        $("#schedule-post").click(function(){
+            $("#schedule-post").prop('disabled',true);
+            $.post("/class/new_post",
+            {
+                title: $('#post-title').val(),
+                content: $('#froala-editor-newquestion').froalaEditor('html.get'),
+                date:$('#schedule-date').val(),
+                time:$('#schedule-time').val(),
+                class_code: "{{class_code}}",
+                is_anonymous:$('#post-is-anonymous').val(),
+                tags_select : $('#tags_select').serialize()
+            },
+            function(data, status){
+                if(status == "success"){
+                    // alert(data+ "\nsuccess");
+                    location.reload();
+                }
+                $("#schedule-post").prop('disabled',false);
+            });   
+        });
+
+        // function to post a comment
+        $("#post-comment").click(function(){
+            $("#post-comment").prop('disabled',true);
+            $.post("/class/new_comment",
+            {
+                post_id: $('#post-comment').attr('data-content-postid'),
+                content: $('#froala-editor-comment').froalaEditor('html.get'),
+                class_code: "{{class_code}}",
+                is_anonymous:$('#comment-is-anonymous').val()
+            },
+            function(data, status){
+                if(status == "success"){
+                    location.reload();
+                }
+                $("#post-comment").prop('disabled',false);
+            });
+        });
+
+        $("#search-icon").click(function(e) {
+            $.get("/class/fetchposts",
+            {
+                class_code: "{{class_code}}",
+                search_key: $('#search-box').val()      
+            },
+            function(data, status){
+                if(status == "success"){
+                    $("#allposts").css('display','none');
+                    $("#close-icon").css("display","inline-block")            
+                    $("#search-icon").css("display","none")
+                    var obj = JSON.parse(data);
+                    $("#fetchedposts").empty();
+                    var ul_class = document.createElement('ul');
+                    ul_class.className = "collection";
+                    var post;
+                    // $("#fetchedposts").append("<ul class=\"collection\" style=\"margin-top: 0px;\">");
+                    $.each(obj.fetchedposts, function(){
+                        post = document.createElement('li');
+                        post.classList.add("collection-item");
+                        post.classList.add("post");
+                        if(!this.seen){
+                            post.classList.add("unread-post");
+                        }
+                        var id = this.id;
+                        (function(value){
+                            post.addEventListener("click", function(){
+                                changeurl(value);   
+                            }, false);})(id)
+                        post.innerHTML = this.title;
+                        
+                        // var post = "<li class=\"collection-item post {% if not "+this.seen+" %}unread-post{% endif %}\" onclick=\"changeurl("+this.id+")\" data-postid="+this.id+">"+this.title+"</li>";
+                        ul_class.appendChild(post);
+                    });
+                    // $("fetchedposts").append("</ul>");
+                    $("#fetchedposts").append(ul_class);
+                    $("#fetchedposts").css("display","block");
+                    // document.getElementById("allposts").style.display='none';
+                    // document.getElementById("fetchedposts").style.display='block';
+                }
+            });
+        });
+
+        $("#close-icon").click(function() {
+            $("#allposts").css('display','block');
+            $("#fetchedposts").css("display","none");
+            $("#close-icon").css("display","none")            
+            $("#search-icon").css("display","inline-block")            
+        });
+
+
+
 });
+
 </script>
+
+<!-- script for date-time picker  -->
+<!-- <script>
+
+    var picker = new MaterialDatetimePicker({})
+    .on('submit', function(d) {
+        output.innerText = d;
+    });
+
+    var el = document.querySelector('.c-datepicker-btn');
+    el.addEventListener('click', function() {
+        document.getElementById("froala-editor").style.opacity="0.5";
+        picker.open();
+    }, false);
+
+</script> -->
 
 </body>
 </html>

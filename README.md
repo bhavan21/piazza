@@ -3,7 +3,16 @@
 ![Django](https://img.shields.io/badge/Django-1.11.6-brightgreen.svg)
 
 ## About
-> This project aims at creating a piazza like application using django backend
+> This project aims at creating a piazza like application using django backend server
+
+## Creating environment
+> It is always preferable to use virtual environments when doing proects based on python
+```
+pip3 install virtualenv
+virtualenv fordis
+cd fordis/bin
+source activate
+```
 
 ## Creating environment
 > It is always preferable to use virtual environments when doing proects based on python
